@@ -15,5 +15,6 @@ pytest==8.2.0
 Flask-Cors
 pandas
 numpy
-scikit-learn
 gunicorn
+scikit-learn
+setuptools
