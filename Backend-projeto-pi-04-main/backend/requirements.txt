@@ -16,3 +16,4 @@ Flask-Cors
 pandas
 numpy
 scikit-learn
+gunicorn
