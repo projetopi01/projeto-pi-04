@@ -10,6 +10,12 @@ import joblib
 import pandas as pd
 
 app = Flask(__name__)
+app.config.update(
+    SESSION_COOKIE_SAMESITE='None', 
+    #para permitir que o Front converse com o back porque eles estão em URLs diferentes
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True
+)
 
 instance_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance')
 os.makedirs(instance_path, exist_ok=True)
