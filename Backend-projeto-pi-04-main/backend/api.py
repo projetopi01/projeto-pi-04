@@ -1,8 +1,34 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from models import db, Gestante
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
+# =========================
+# LOGIN
+# =========================
+@api_bp.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+
+    usuario = data.get("usuario")
+    senha = data.get("senha")
+
+    # LOGIN SIMPLES (trocar depois por banco se quiser)
+    if usuario == "admin" and senha == "123":
+        return jsonify({
+            "success": True,
+            "message": "Login realizado com sucesso"
+        })
+
+    return jsonify({
+        "success": False,
+        "message": "Usuário ou senha inválidos"
+    }), 401
+
+
+# =========================
+# LISTAR GESTANTES
+# =========================
 @api_bp.route('/gestantes', methods=['GET'])
 def get_gestantes():
     gestantes = Gestante.query.all()
@@ -22,7 +48,8 @@ def get_gestantes():
             "cidade": gestante.cidade,
             "estado": gestante.estado,
             "telefone": gestante.telefone
-        } for gestante in gestantes
+        }
+        for gestante in gestantes
     ]
 
     return jsonify(gestantes_lista)
