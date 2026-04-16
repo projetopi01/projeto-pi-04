@@ -1,0 +1,32 @@
+name: Deploy no Render
+
+on:
+  push:
+    branches:
+      - main  # Ajuste para o nome da sua branch principal, se for "master", troque "main" por "master"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # Ambiente de execução
+
+    steps:
+      - name: Baixar o código do repositório
+        uses: actions/checkout@v3
+
+      - name: Configurar o Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"  # Ajuste para a versão do Python que você está usando no Render
+
+      - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt  # Ajuste o caminho caso necessário
+
+      - name: Testar aplicação
+        run: |
+          python -m unittest discover backend/tests  # Se não tiver testes ainda, podemos remover essa etapa
+
+      - name: Notificar o Render para atualizar
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
