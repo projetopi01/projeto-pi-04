@@ -103,8 +103,8 @@ def login():
     data = request.get_json()
     if not data:
         return jsonify({'error': 'Requisição inválida'}), 400
-    username = os.getenv('APP_USERNAME', 'usuario')
-    password = os.getenv('APP_PASSWORD', '123456')
+    username = os.getenv('APP_USERNAME', 'admin')
+    password = os.getenv('APP_PASSWORD', '123')
     if data.get('username') == username and data.get('password') == password:
         session['user_id'] = data.get('username')
         return jsonify({'message': 'Login realizado com sucesso'}), 200
