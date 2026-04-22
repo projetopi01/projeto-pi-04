@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // O Frontend vai ler a URL daqui
-  baseURL: import.meta.env.VITE_API_URL, 
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true, // Adicione esta linha
 });
+
 
 export default api;
