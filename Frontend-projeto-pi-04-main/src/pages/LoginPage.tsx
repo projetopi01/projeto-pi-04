@@ -22,9 +22,10 @@ function LoginPage() {
     try {
       // CORREÇÃO 1: Enviando 'usuario' e 'senha' como o Flask espera
       const payload = {
-        usuario: username,
-        senha: password,
-      };
+      username: username,
+      password: password,
+    };
+
 
       await api.post('/api/login', payload);
 
