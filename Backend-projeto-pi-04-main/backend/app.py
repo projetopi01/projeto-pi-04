@@ -24,7 +24,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(instance_path,
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'erlandsonsilvadonascimento')
 
-CORS(app, supports_credentials=True, origins=["http://localhost:5173", "https://projeto-pi-04-1.onrender.com", "https://projeto-pi-04-c4je.onrender.com"])
+CORS(app, supports_credentials=True, origins=["http://localhost:5173", "https://projeto-pi-04-1.onrender.com"])
 
 db = SQLAlchemy(app)
 
@@ -103,8 +103,8 @@ def login():
     data = request.get_json()
     if not data:
         return jsonify({'error': 'Requisição inválida'}), 400
-    username = os.getenv('APP_USERNAME', 'admin')
-    password = os.getenv('APP_PASSWORD', '123')
+    username = os.getenv('APP_USERNAME', 'usuario')
+    password = os.getenv('APP_PASSWORD', '123456')
     if data.get('username') == username and data.get('password') == password:
         session['user_id'] = data.get('username')
         return jsonify({'message': 'Login realizado com sucesso'}), 200
