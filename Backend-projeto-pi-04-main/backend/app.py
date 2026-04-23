@@ -24,7 +24,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(instance_path,
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'erlandsonsilvadonascimento')
 
-CORS(app, supports_credentials=True, origins=["http://localhost:5173", "https://projeto-pi-04-1.onrender.com"])
+CORS(app, supports_credentials=True, origins=["http://localhost:5173", "https://projeto-pi-04-1.onrender.com", "https://projeto-pi-04-c4je.onrender.com"])
 
 db = SQLAlchemy(app)
 
