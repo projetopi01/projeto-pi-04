@@ -14,34 +14,32 @@ function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setError('');
+ const handleSubmit = async (event: React.FormEvent) => {
+  event.preventDefault();
+  setIsLoading(true);
+  setError('');
 
-    try {
-      const payload = {
-        username: username,
-        password: password,
-      };
+  try {
+    const payload = {
+      username: username,
+      password: password,
+    };
 
+    await api.post('/api/login', payload);
 
-      await api.post('/api/login', payload);
+    login();
+    navigate('/');
 
-      login();
-      navigate('/');
-
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        // CORREÇÃO 2: Lendo 'message' em vez de 'error'
-        setError(err.response.data.message || 'Ocorreu um erro.');
-      } else {
-        setError('Não foi possível conectar ao servidor. Tente novamente.');
-      }
-    } finally {
-      setIsLoading(false);
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response) {
+      setError(err.response.data.error || 'Ocorreu um erro.');
+    } else {
+      setError('Não foi possível conectar ao servidor. Tente novamente.');
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="max-w-3xl mx-auto p-5 text-center">
