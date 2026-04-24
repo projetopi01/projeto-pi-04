@@ -243,67 +243,86 @@ def delete_sinais_vitais(cpf):
 @login_required
 def prever_risco(cpf):
     model_path = os.path.join(instance_path, 'risk_model.joblib')
+    
+    # Captura os sintomas enviados pelo Checklist do médico (0 ou 1)
+    # Ex: /api/risco/12345678900?sangramento=1&cefaleia=0&edema=0
+    sangramento = request.args.get('sangramento', 0, type=int)
+    cefaleia = request.args.get('cefaleia', 0, type=int)
+    edema = request.args.get('edema', 0, type=int)
+
     cpf_limpo = re.sub(r'\D', '', cpf)
     usuario = Usuario.query.filter_by(cpf=cpf_limpo).first()
-    
-    # Buscamos os sinais vitais ordenados do mais recente para o mais antigo
     sinais = SinaisVitais.query.filter_by(usuario_cpf=cpf_limpo).order_by(SinaisVitais.timestamp.desc()).all()
 
     if not usuario or not sinais:
         return jsonify({'error': 'Dados insuficientes para fazer a predição.'}), 404
     
-    # O sinal mais recente (que acabou de vir do simulador)
-    ultimo_sinal = sinais[0] 
-
-    # --- CAMADA DE DECISÃO 1: PROTOCOLO FERRAZ DE VASCONCELOS (2025) ---
-    # Verificação imediata de sinais de alerta (Pág. 24 e 26 do Manual)
-    
-    pa_sistolica = ultimo_sinal.pressao_sistolica
-    pa_diastolica = ultimo_sinal.pressao_diastolica
-    bpm = ultimo_sinal.batimentos_cardiacos
-    oxi = ultimo_sinal.oxigenacao_sangue
+    ultimo_sinal = sinais[0]
     idade = usuario.idade
 
-    # Se atingir qualquer critério clínico, retorna ALTO RISCO na hora
-    if (pa_sistolica >= 140 or pa_diastolica >= 90 or bpm > 110 or oxi < 94 or idade >= 40 or idade <= 15):
-        return jsonify({
-            'risco': 'Alto',
-            'metodo': 'Protocolo Clínico Ferraz 2025',
-            'detalhe': 'Sinal de alerta imediato detectado.'
-        }), 200
+    # --- INÍCIO DO PROTOCOLO FERRAZ DE VASCONCELOS (Pág 25-26) ---
+    pontos_ferraz = 0
 
-    # --- CAMADA DE DECISÃO 2: MACHINE LEARNING ---
-    # Se os sinais atuais estão "normais", a IA analisa a tendência histórica
-    if not os.path.exists(model_path):
-        return jsonify({'risco': 'Baixo', 'info': 'IA não treinada, mas sinais atuais ok.'}), 200
+    # 1. Pontuação por Sintomas (Dados do Checklist Médico)
+    if sangramento: pontos_ferraz += 10  # Peso máximo no manual
+    if cefaleia: pontos_ferraz += 5     # Sinal de pré-eclâmpsia
+    if edema: pontos_ferraz += 1        # Sinal de alerta leve
+
+    # 2. Pontuação por Sinais Vitais (Dados do Sensor/Simulador)
+    if ultimo_sinal.pressao_sistolica >= 140 or ultimo_sinal.pressao_diastolica >= 90:
+        pontos_ferraz += 10
+    if ultimo_sinal.batimentos_cardiacos > 110:
+        pontos_ferraz += 5
+    if ultimo_sinal.oxigenacao_sangue < 94:
+        pontos_ferraz += 10
+
+    # 3. Pontuação por Idade (Fator Reprodutivo)
+    if idade >= 40 or idade <= 15:
+        pontos_ferraz += 5
+
+    # --- CLASSIFICAÇÃO DE RISCO FINAL ---
+    # Conforme o manual, pontos acumulados definem a urgência
+    if pontos_ferraz >= 10:
+        risco_final = "Alto"
+    elif pontos_ferraz >= 5:
+        risco_final = "Médio"
+    else:
+        risco_final = "Baixo"
+
+    # Se o risco for baixo pelos pontos, ainda rodamos a IA para checar tendências
+    metodo_usado = "Protocolo Clínico Ferraz 2025"
     
-    try:
-        model = joblib.load(model_path)
-        sinais_df = pd.DataFrame([{
-            'bat': s.batimentos_cardiacos,
-            'oxi': s.oxigenacao_sangue,
-            'sis': s.pressao_sistolica,
-            'dia': s.pressao_diastolica
-        } for s in sinais])
+    if risco_final == "Baixo" and os.path.exists(model_path):
+        try:
+            model = joblib.load(model_path)
+            sinais_df = pd.DataFrame([{
+                'bat': s.batimentos_cardiacos, 'oxi': s.oxigenacao_sangue,
+                'sis': s.pressao_sistolica, 'dia': s.pressao_diastolica
+            } for s in sinais])
 
-        # Prepara os dados para a IA (usando a média, como no seu original)
-        dados_para_prever = pd.DataFrame([[
-            idade,
-            sinais_df['bat'].mean(),
-            sinais_df['oxi'].mean(),
-            sinais_df['sis'].mean(),
-            sinais_df['dia'].mean()
-        ]], columns=['idade', 'batimentos_avg', 'oxigenacao_avg', 'pressao_sistolica_avg', 'pressao_diastolica_avg'])
-        
-        dados_para_prever.columns = dados_para_prever.columns.astype(str)
-        predicao = model.predict(dados_para_prever)
-        
-        return jsonify({'risco': predicao[0], 'metodo': 'Machine Learning'}), 200
+            dados_para_prever = pd.DataFrame([[
+                idade, sinais_df['bat'].mean(), sinais_df['oxi'].mean(),
+                sinais_df['sis'].mean(), sinais_df['dia'].mean()
+            ]], columns=['idade', 'batimentos_avg', 'oxigenacao_avg', 'pressao_sistolica_avg', 'pressao_diastolica_avg'])
+            
+            dados_para_prever.columns = dados_para_prever.columns.astype(str)
+            predicao = model.predict(dados_para_prever)
+            
+            if predicao[0] != "Baixo":
+                risco_final = predicao[0]
+                metodo_usado = "Machine Learning (Tendência Histórica)"
+        except:
+            pass # Se a IA falhar, mantemos o risco clínico por segurança
 
-    except Exception as e:
-        return jsonify({'error': 'Erro na predição da IA', 'details': str(e)}), 500
-
-
+    return jsonify({
+        'risco': risco_final,
+        'pontuacao_total': pontos_ferraz,
+        'metodo': metodo_usado,
+        'detalhes': {
+            'sangramento': bool(sangramento),
+            'pressao': f"{ultimo_sinal.pressao_sistolica}/{ultimo_sinal.pressao_diastolica}"
+        }
+    }), 200
 
 if __name__ == '__main__':
    port = int(os.environ.get("PORT", 5000))
