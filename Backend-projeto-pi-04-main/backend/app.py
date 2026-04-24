@@ -243,41 +243,66 @@ def delete_sinais_vitais(cpf):
 @login_required
 def prever_risco(cpf):
     model_path = os.path.join(instance_path, 'risk_model.joblib')
-    if not os.path.exists(model_path):
-        return jsonify({'error': 'Modelo de predição ainda não foi treinado. Execute o script train_model.py primeiro.'}), 500
-    
-    model = joblib.load(model_path)
     cpf_limpo = re.sub(r'\D', '', cpf)
     usuario = Usuario.query.filter_by(cpf=cpf_limpo).first()
-    sinais = SinaisVitais.query.filter_by(usuario_cpf=cpf_limpo).all()
+    
+    # Buscamos os sinais vitais ordenados do mais recente para o mais antigo
+    sinais = SinaisVitais.query.filter_by(usuario_cpf=cpf_limpo).order_by(SinaisVitais.timestamp.desc()).all()
 
     if not usuario or not sinais:
-        return jsonify({'error': 'Dados insuficientes para fazer a predição (cadastro ou sinais vitais não encontrados).'}), 404
+        return jsonify({'error': 'Dados insuficientes para fazer a predição.'}), 404
     
-    sinais_df = pd.DataFrame([s.__dict__ for s in sinais])
-    batimentos_avg = sinais_df['batimentos_cardiacos'].mean()
-    oxigenacao_avg = sinais_df['oxigenacao_sangue'].mean()
-    pressao_sistolica_avg = sinais_df['pressao_sistolica'].mean()
-    pressao_diastolica_avg = sinais_df['pressao_diastolica'].mean()
+    # O sinal mais recente (que acabou de vir do simulador)
+    ultimo_sinal = sinais[0] 
 
-    dados_para_prever = pd.DataFrame([[
-        usuario.idade,
-        batimentos_avg,
-        oxigenacao_avg,
-        pressao_sistolica_avg,
-        pressao_diastolica_avg
-    ]], columns=['idade', 'batimentos_avg', 'oxigenacao_avg', 'pressao_sistolica_avg', 'pressao_diastolica_avg'])
+    # --- CAMADA DE DECISÃO 1: PROTOCOLO FERRAZ DE VASCONCELOS (2025) ---
+    # Verificação imediata de sinais de alerta (Pág. 24 e 26 do Manual)
     
-    # --- LINHA DE CORREÇÃO ADICIONADA ---
-    # Garante que os nomes das colunas são strings, igual ao treino
-    dados_para_prever.columns = dados_para_prever.columns.astype(str)
+    pa_sistolica = ultimo_sinal.pressao_sistolica
+    pa_diastolica = ultimo_sinal.pressao_diastolica
+    bpm = ultimo_sinal.batimentos_cardiacos
+    oxi = ultimo_sinal.oxigenacao_sangue
+    idade = usuario.idade
 
+    # Se atingir qualquer critério clínico, retorna ALTO RISCO na hora
+    if (pa_sistolica >= 140 or pa_diastolica >= 90 or bpm > 110 or oxi < 94 or idade >= 40 or idade <= 15):
+        return jsonify({
+            'risco': 'Alto',
+            'metodo': 'Protocolo Clínico Ferraz 2025',
+            'detalhe': 'Sinal de alerta imediato detectado.'
+        }), 200
+
+    # --- CAMADA DE DECISÃO 2: MACHINE LEARNING ---
+    # Se os sinais atuais estão "normais", a IA analisa a tendência histórica
+    if not os.path.exists(model_path):
+        return jsonify({'risco': 'Baixo', 'info': 'IA não treinada, mas sinais atuais ok.'}), 200
+    
     try:
+        model = joblib.load(model_path)
+        sinais_df = pd.DataFrame([{
+            'bat': s.batimentos_cardiacos,
+            'oxi': s.oxigenacao_sangue,
+            'sis': s.pressao_sistolica,
+            'dia': s.pressao_diastolica
+        } for s in sinais])
+
+        # Prepara os dados para a IA (usando a média, como no seu original)
+        dados_para_prever = pd.DataFrame([[
+            idade,
+            sinais_df['bat'].mean(),
+            sinais_df['oxi'].mean(),
+            sinais_df['sis'].mean(),
+            sinais_df['dia'].mean()
+        ]], columns=['idade', 'batimentos_avg', 'oxigenacao_avg', 'pressao_sistolica_avg', 'pressao_diastolica_avg'])
+        
+        dados_para_prever.columns = dados_para_prever.columns.astype(str)
         predicao = model.predict(dados_para_prever)
-        risco = predicao[0]
-        return jsonify({'risco': risco}), 200
+        
+        return jsonify({'risco': predicao[0], 'metodo': 'Machine Learning'}), 200
+
     except Exception as e:
-        return jsonify({'error': 'Falha ao realizar a predição.', 'details': str(e)}), 500
+        return jsonify({'error': 'Erro na predição da IA', 'details': str(e)}), 500
+
 
 
 if __name__ == '__main__':
