@@ -28,7 +28,7 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf }) => {
         const response = await api.get(`/api/sinais-vitais/${cpf}`);
         const dadosFormatados = response.data.map((d: SinaisVitaisData) => ({
           ...d,
-          timestamp: new Date(d.timestamp).toLocaleTimeString('pt-BR'),
+          timestamp: new Date(d.timestamp + " Z").toLocaleTimeString('pt-BR'),
         }));
         setDados(dadosFormatados);
         setError(null); // Limpa erro se a conexão voltar
