@@ -20,19 +20,25 @@ const RiskIndicator: React.FC<RiskIndicatorProps> = ({ cpf }) => {
     const fetchRisk = async () => {
       if (!cpf) return;
       try {
-        // Chama o novo endpoint da API que criamos
         const response = await api.get(`/api/risco/${cpf}`);
         setRisk(response.data.risco);
       } catch (error) {
         console.error("Erro ao buscar previsão de risco:", error);
-        setRisk('Indeterminado');
+        // Não resetamos para 'Indeterminado' se já tivermos um valor, para evitar piscar
+        if (!risk) setRisk('Indeterminado');
       } finally {
         setLoading(false);
       }
     };
 
     fetchRisk();
-  }, [cpf]);
+
+    // AJUSTE DE VELOCIDADE: Atualiza o status de risco a cada 2 segundos
+    // Isso garante que o alerta de "Alto Risco" apareça rápido na apresentação
+    const intervalId = setInterval(fetchRisk, 2000);
+
+    return () => clearInterval(intervalId);
+  }, [cpf]); // Mantendo apenas o cpf como dependência
 
   if (loading) {
     return <div className="text-center p-4">Calculando risco gestacional...</div>;
@@ -41,7 +47,7 @@ const RiskIndicator: React.FC<RiskIndicatorProps> = ({ cpf }) => {
   const style = risk ? riskStyles[risk] || 'bg-gray-100 text-gray-800' : 'bg-gray-100 text-gray-800';
 
   return (
-    <div className={`p-4 mt-6 mb-8 rounded-lg border-2 text-center ${style}`}>
+    <div className={`p-4 mt-6 mb-8 rounded-lg border-2 text-center transition-all duration-500 ${style}`}>
       <h3 className="font-bold text-lg">Risco Gestacional Previsto</h3>
       <p className="text-2xl font-extrabold">{risk || 'N/A'}</p>
     </div>
