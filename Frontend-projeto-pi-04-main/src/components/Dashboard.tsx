@@ -30,7 +30,6 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
         const response = await api.get(`/api/sinais-vitais/${cpf}`);
         const dadosFormatados = response.data.map((d: SinaisVitaisData) => ({
           ...d,
-          // Hora formatada para o eixo X
           horaCurta: new Date(d.timestamp + " Z").toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second:'2-digit' }),
         }));
         setDados(dadosFormatados);
@@ -48,105 +47,98 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
 
   if (loading) return <p className="text-center p-4">A carregar monitoramento...</p>;
 
-  // Pega o dado mais recente para os quadros numéricos
   const ultimaLeitura = dados.length > 0 ? dados[dados.length - 1] : null;
+
+  // LÓGICA DE PROCESSAMENTO (MANUAL DE FERRAZ)
+  const getPressaoStatus = (sistolica: number) => {
+    if (sistolica >= 140) return { label: 'ALTA (RISCO)', color: 'bg-rose-600 text-white border-rose-800' };
+    if (sistolica >= 130) return { label: 'ALERTA', color: 'bg-amber-100 text-amber-700 border-amber-300' };
+    return { label: 'NORMAL', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+  };
 
   return (
     <section className="mt-8">
       
-      {/* GRID SUPERIOR: IDADE E RISCO */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <GestationalAgeCard dum={dum || ""} />
         <RiskIndicator cpf={cpf} />
       </div>
 
-      {/* ÁREA DO MONITOR TIPO HOSPITALAR */}
-      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+      <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100">
         
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-[#1a5276] flex items-center gap-2">
+          <h2 className="text-xl font-black text-[#1a5276] flex items-center gap-2 uppercase tracking-tighter">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
             </span>
-            Monitor de Sinais Vitais
+            Sinais Vitais em Tempo Real
           </h2>
-          <div className="text-[10px] font-bold bg-gray-100 px-2 py-1 rounded text-gray-500 uppercase tracking-widest">
-            Live Stream
-          </div>
         </div>
 
         {dados.length > 0 && ultimaLeitura ? (
           <>
-            {/* --- QUADRO DE NÚMEROS (Telinha Digital) --- */}
+            {/* --- QUADRO DE NÚMEROS PROCESSADOS --- */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              
               {/* Batimentos */}
-              <div className="bg-rose-50 border-b-4 border-rose-500 p-4 rounded-lg shadow-sm">
-                <p className="text-[10px] font-bold text-rose-500 uppercase">Batimentos</p>
+              <div className="bg-white border-2 border-gray-100 p-4 rounded-2xl shadow-sm">
+                <p className="text-[10px] font-black text-gray-400 uppercase mb-2">Batimentos</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-rose-700">{Math.round(ultimaLeitura.batimentos)}</span>
-                  <span className="text-xs font-bold text-rose-400">BPM</span>
+                  <span className="text-4xl font-black text-rose-600 tracking-tighter">{Math.round(ultimaLeitura.batimentos)}</span>
+                  <span className="text-xs font-bold text-gray-400">BPM</span>
                 </div>
               </div>
 
               {/* Oxigenação */}
-              <div className="bg-blue-50 border-b-4 border-blue-500 p-4 rounded-lg shadow-sm">
-                <p className="text-[10px] font-bold text-blue-500 uppercase">Oxigenação</p>
+              <div className="bg-white border-2 border-gray-100 p-4 rounded-2xl shadow-sm">
+                <p className="text-[10px] font-black text-gray-400 uppercase mb-2">Oxigenação</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-blue-700">{Math.round(ultimaLeitura.oxigenacao)}</span>
-                  <span className="text-xs font-bold text-blue-400">%</span>
+                  <span className="text-4xl font-black text-blue-600 tracking-tighter">{Math.round(ultimaLeitura.oxigenacao)}</span>
+                  <span className="text-xs font-bold text-gray-400">%</span>
                 </div>
               </div>
 
-              {/* Pressão Sistólica */}
-              <div className="bg-amber-50 border-b-4 border-amber-500 p-4 rounded-lg shadow-sm">
-                <p className="text-[10px] font-bold text-amber-600 uppercase">P. Sistólica</p>
+              {/* P. Sistólica DINÂMICA (AQUI ESTÁ A ANÁLISE) */}
+              <div className={`p-4 rounded-2xl border-2 transition-all duration-500 shadow-md ${getPressaoStatus(ultimaLeitura.pressao_sistolica).color}`}>
+                <p className="text-[10px] font-black uppercase mb-2 opacity-80 text-current">P. Sistólica</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-amber-700">{ultimaLeitura.pressao_sistolica}</span>
-                  <span className="text-xs font-bold text-amber-500">mmHg</span>
+                  <span className="text-4xl font-black tracking-tighter">{ultimaLeitura.pressao_sistolica}</span>
+                  <span className="text-xs font-bold opacity-80">mmHg</span>
                 </div>
+                <p className="text-[9px] font-black mt-2 tracking-widest">{getPressaoStatus(ultimaLeitura.pressao_sistolica).label}</p>
               </div>
 
-              {/* Pressão Diastólica */}
-              <div className="bg-purple-50 border-b-4 border-purple-500 p-4 rounded-lg shadow-sm">
-                <p className="text-[10px] font-bold text-purple-500 uppercase">P. Diastólica</p>
+              {/* P. Diastólica */}
+              <div className="bg-white border-2 border-gray-100 p-4 rounded-2xl shadow-sm">
+                <p className="text-[10px] font-black text-gray-400 uppercase mb-2">P. Diastólica</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-purple-700">{ultimaLeitura.pressao_diastolica}</span>
-                  <span className="text-xs font-bold text-purple-400">mmHg</span>
+                  <span className="text-4xl font-black text-purple-600 tracking-tighter">{ultimaLeitura.pressao_diastolica}</span>
+                  <span className="text-xs font-bold text-gray-400">mmHg</span>
                 </div>
               </div>
             </div>
 
             {/* --- GRÁFICO --- */}
-            <div className="h-[350px] w-full bg-gray-50 rounded-xl p-4 border border-gray-100">
+            <div className="h-[350px] w-full bg-gray-50/50 rounded-2xl p-4 border border-gray-100">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={dados}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                  <XAxis dataKey="horaCurta" tick={{fontSize: 10}} minTickGap={40} />
-                  
-                  {/* Eixo para BPM e Pressão */}
+                  <XAxis dataKey="horaCurta" tick={{fontSize: 10, fontWeight: 'bold'}} minTickGap={40} />
                   <YAxis yAxisId="left" domain={[40, 180]} tick={{fontSize: 10}} />
-                  
-                  {/* Eixo exclusivo para Oxigênio (para não achatar a linha) */}
                   <YAxis yAxisId="right" orientation="right" domain={[80, 100]} hide />
-
-                  <Tooltip contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} />
-                  <Legend verticalAlign="top" height={36}/>
-
-                  {/* Oxigênio como uma sombra azul no fundo */}
+                  <Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontWeight: 'bold'}} />
+                  <Legend verticalAlign="top" height={36} wrapperStyle={{fontWeight: 'bold', fontSize: '12px'}}/>
                   <Area yAxisId="right" type="monotone" dataKey="oxigenacao" name="Oxigênio" fill="#dbeafe" stroke="#3b82f6" isAnimationActive={false} />
-                  
-                  {/* Linhas principais */}
-                  <Line yAxisId="left" type="monotone" dataKey="batimentos" name="BPM" stroke="#ef4444" strokeWidth={3} dot={false} isAnimationActive={false} />
+                  <Line yAxisId="left" type="monotone" dataKey="batimentos" name="BPM" stroke="#ef4444" strokeWidth={4} dot={false} isAnimationActive={false} />
                   <Line yAxisId="left" type="monotone" dataKey="pressao_sistolica" name="Sistólica" stroke="#f59e0b" strokeWidth={2} dot={false} strokeDasharray="5 5" isAnimationActive={false} />
-                  <Line yAxisId="left" type="monotone" dataKey="pressao_diastolica" name="Diastólica" stroke="#8b5cf6" strokeWidth={2} dot={false} strokeDasharray="5 5" isAnimationActive={false} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
           </>
         ) : (
-          <div className="text-center py-20 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-            <p className="text-gray-400 font-medium">Aguardando sinais do simulador...</p>
+          <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">Aguardando telemetria da paciente...</p>
           </div>
         )}
       </div>
