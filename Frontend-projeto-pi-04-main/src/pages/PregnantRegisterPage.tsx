@@ -108,14 +108,18 @@ function PregnantRegisterPage() {
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-12">
             
-            <SearchByCpf 
-                onGestanteFound={onGestanteFound} 
-                onClear={handleClear} 
-                gestanteEncontrada={isEditing ? { ...formData, id: 0, cronograma: scheduleData, idade: parseInt(formData.idade) || 0 } : null} 
-            />
+            {/* ESCONDE A BUSCA NA IMPRESSÃO */}
+            <div className="print:hidden">
+                <SearchByCpf 
+                    onGestanteFound={onGestanteFound} 
+                    onClear={handleClear} 
+                    gestanteEncontrada={isEditing ? { ...formData, id: 0, cronograma: scheduleData, idade: parseInt(formData.idade) || 0 } : null} 
+                />
+            </div>
 
+            {/* ESCONDE AS MENSAGENS NA IMPRESSÃO */}
             {message && (
-                <div className={`p-4 text-center font-bold rounded-xl shadow-lg border-2 animate-in fade-in duration-300 ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
+                <div className={`print:hidden p-4 text-center font-bold rounded-xl shadow-lg border-2 animate-in fade-in duration-300 ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
                     {message.text}
                     {message.type === 'success' && lastRegistered && (
                         <button onClick={handleViewLastRegistered} className="ml-4 font-black underline hover:text-emerald-900 transition-all">Visualizar Prontuário</button>
@@ -156,10 +160,30 @@ function PregnantRegisterPage() {
                 <div className="space-y-10 animate-in fade-in zoom-in-95 duration-500">
                     
                     <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 relative">
-                        <SectionTitle title="Prontuário Médico Digital" />
+                        
+                        {/* CABEÇALHO TIMBRADO - APARECE APENAS NA IMPRESSÃO/PDF */}
+                        <div className="hidden print:block mb-10 border-b-4 border-[#1a5276] pb-6">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h1 className="text-3xl font-black text-[#1a5276] uppercase tracking-tighter">Rede Cegonha - Suzano</h1>
+                                    <p className="text-md font-bold text-gray-500 uppercase tracking-widest mt-1">Relatório de Monitoramento Pré-Natal</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm font-bold uppercase text-gray-700">Protocolo: Manual de Ferraz</p>
+                                    <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">
+                                        Gerado em: {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Oculta o título padrão na impressão para usar o timbrado acima */}
+                        <div className="print:hidden">
+                            <SectionTitle title="Prontuário Médico Digital" />
+                        </div>
 
                         {showEditForm ? (
-                            <div className="bg-blue-50/50 p-6 rounded-2xl border-2 border-blue-200 mb-8 animate-in fade-in duration-300">
+                            <div className="bg-blue-50/50 p-6 rounded-2xl border-2 border-blue-200 mb-8 animate-in fade-in duration-300 print:hidden">
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-lg font-black text-[#1a5276]">Editando Dados Pessoais</h3>
                                     <button type="button" onClick={() => setShowEditForm(false)} className="text-rose-500 font-bold px-4 py-2 bg-white rounded-xl shadow-sm hover:bg-rose-50 transition-all border border-rose-100">
@@ -179,12 +203,28 @@ function PregnantRegisterPage() {
                             <PrenatalSchedule scheduleData={scheduleData} setScheduleData={setScheduleData} />
                         </div>
                         
-                        <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-center gap-4">
+                        {/* BOTÕES DE AÇÃO - ESCONDIDOS NA IMPRESSÃO */}
+                        <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-center gap-4 print:hidden">
+                            
+                            {/* NOVO BOTÃO DE GERAR PDF */}
+                            <button 
+                                type="button" 
+                                onClick={() => window.print()} 
+                                className="notranslate bg-emerald-600 text-white py-4 px-8 rounded-2xl hover:bg-emerald-700 transition-all font-black shadow-lg active:scale-95 uppercase tracking-widest flex items-center justify-center gap-2"
+                                translate="no"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                </svg>
+                                Exportar PDF
+                            </button>
+
                             <button onClick={handleUpdate} disabled={isLoading} className="bg-[#1a5276] text-white py-4 px-10 rounded-2xl hover:bg-[#154360] transition-all font-black shadow-lg active:scale-95 disabled:bg-gray-300 uppercase tracking-widest">
                                 {isLoading ? 'SALVANDO...' : 'SALVAR ALTERAÇÕES'}
                             </button>
+                            
                             <button type="button" onClick={handleClear} className="bg-gray-100 text-gray-500 font-bold py-4 px-10 rounded-2xl hover:bg-gray-200 transition-all border border-gray-200 uppercase tracking-widest text-xs">
-                                Fechar
+                                Fechar Prontuário
                             </button>
                         </div>
                     </div>
