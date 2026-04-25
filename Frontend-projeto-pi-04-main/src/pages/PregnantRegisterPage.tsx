@@ -142,7 +142,7 @@ function PregnantRegisterPage() {
                             disabled={isLoading} 
                             className="w-full sm:w-auto bg-[#1a5276] text-white font-black py-4 px-12 rounded-2xl hover:bg-[#154360] transition-all shadow-xl active:scale-95 disabled:bg-gray-300"
                         >
-                            {isLoading ? 'REGISTRANDO...' : 'REGISTRAR GESTANTE'}
+                            {isLoading ? 'REGISTRANDO...' : 'REGISTRAR'}
                         </button>
                         <button 
                             type="button" 
