@@ -52,30 +52,27 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
 
   const ultimaLeitura = dados.length > 0 ? dados[dados.length - 1] : null;
 
-  // 1. Lógica BPM (Rosa -> Vermelho)
+  // Lógicas de cores dos Cards
   const getBpmStatus = (bpm: number) => {
     if (bpm >= 110 || bpm <= 60) return { label: 'CRÍTICO', bg: 'bg-red-600', border: 'border-red-800', text: 'text-white', pulse: 'animate-pulse shadow-lg shadow-red-200' };
     if (bpm >= 100) return { label: 'ATENÇÃO', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600', pulse: '' };
     return { label: 'NORMAL', bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-600', pulse: '' };
   };
 
-  // 2. Lógica Sistólica (Verde -> Vermelho)
   const getSistolicaStatus = (sistolica: number) => {
     if (sistolica >= 140) return { label: 'RISCO ALTO', bg: 'bg-red-600', border: 'border-red-800', text: 'text-white', pulse: 'animate-pulse shadow-lg shadow-red-200' };
     if (sistolica >= 130) return { label: 'ALERTA', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600', pulse: '' };
     return { label: 'NORMAL', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-600', pulse: '' };
   };
 
-  // 3. Lógica Diastólica (Roxo -> Vermelho)
   const getDiastolicaStatus = (diastolica: number) => {
     if (diastolica >= 90) return { label: 'ALTA', bg: 'bg-red-600', border: 'border-red-800', text: 'text-white', pulse: 'animate-pulse shadow-lg shadow-red-200' };
     return { label: 'NORMAL', bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-600', pulse: '' };
   };
 
-  // 4. Lógica Oxigênio (Azul -> Vermelho)
   const getO2Status = (o2: number) => {
     if (o2 < 95) return { label: 'BAIXA', bg: 'bg-red-600', border: 'border-red-800', text: 'text-white', pulse: 'animate-pulse shadow-lg shadow-red-200' };
-    return { label: 'NORMAL', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-600', pulse: '' };
+    return { label: 'NORMAL', bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-700', pulse: '' };
   };
 
   return (
@@ -162,49 +159,68 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
 
             </div>
 
-            <div className="h-[320px] w-full bg-gray-50/50 rounded-2xl p-5 border border-gray-100">
+            <div className="h-[320px] w-full bg-white rounded-2xl p-5 border-2 border-gray-100 shadow-inner">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={dados} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#EEEEEE" />
+                  
+                  {/* GRID COM TRAÇOS VERTICAIS E HORIZONTAIS */}
+                  <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#D1D5DB" />
+                  
                   <XAxis 
                     dataKey="horaCurta" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{fontSize: 11, fill: '#9CA3AF', fontFamily: GRAPH_FONT, fontWeight: 400}} 
+                    tick={{fontSize: 11, fill: '#6B7280', fontFamily: GRAPH_FONT, fontWeight: 600}} 
                     minTickGap={60} 
                   />
                   <YAxis 
                     yAxisId="left" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{fontSize: 11, fill: '#9CA3AF', fontFamily: GRAPH_FONT, fontWeight: 400}} 
+                    tick={{fontSize: 11, fill: '#6B7280', fontFamily: GRAPH_FONT, fontWeight: 600}} 
                     domain={[40, 180]} 
                   />
                   <YAxis yAxisId="right" orientation="right" domain={[80, 100]} hide />
+                  
                   <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 15px 30px -5px rgba(0,0,0,0.15)', fontFamily: GRAPH_FONT, padding: '12px' }}
-                    itemStyle={{ fontSize: '12px', fontWeight: 700, padding: '2px 0' }}
-                    labelStyle={{ fontSize: '10px', color: '#9CA3AF', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px' }}
-                    cursor={{ stroke: '#1a5276', strokeWidth: 1, strokeDasharray: '6 6' }}
+                    contentStyle={{ borderRadius: '16px', border: '2px solid #E5E7EB', boxShadow: '0 15px 30px -5px rgba(0,0,0,0.15)', fontFamily: GRAPH_FONT, padding: '12px' }}
+                    itemStyle={{ fontSize: '13px', fontWeight: 800, padding: '2px 0' }}
+                    labelStyle={{ fontSize: '11px', color: '#6B7280', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}
+                    cursor={{ stroke: '#4B5563', strokeWidth: 1.5, strokeDasharray: '4 4' }}
                   />
+                  
                   <Legend 
                     iconType="circle" 
-                    iconSize={8}
+                    iconSize={10}
                     verticalAlign="top" 
                     align="right" 
                     height={50} 
-                    wrapperStyle={{ fontSize: '11px', fontFamily: GRAPH_FONT, textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 800, color: '#333', paddingBottom: '20px' }} 
+                    wrapperStyle={{ fontSize: '12px', fontFamily: GRAPH_FONT, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 800, color: '#111827', paddingBottom: '20px' }} 
                   />
-                  <Area yAxisId="right" type="monotone" dataKey="oxigenacao" fill="#EFF6FF" stroke="none" isAnimationActive={false} />
+                  
+                  {/* Área de Oxigênio (Mais visível e com borda forte) */}
+                  <Area 
+                    yAxisId="right" 
+                    type="monotone" 
+                    dataKey="oxigenacao" 
+                    name="Saturação O₂"
+                    fill="#BFDBFE" 
+                    fillOpacity={0.4}
+                    stroke="#007BFF" 
+                    strokeWidth={2}
+                    isAnimationActive={false} 
+                  />
+                  
+                  {/* Linhas Principais (Cores "Neon" super vivas) */}
                   <Line 
                     yAxisId="left" 
                     type="monotone" 
                     dataKey="batimentos" 
                     name="Frequência Cardíaca" 
-                    stroke="#EF4444" 
-                    strokeWidth={1.5} 
-                    dot={{ r: 3, fill: '#EF4444', strokeWidth: 0 }} 
-                    activeDot={{ r: 5, stroke: 'white', strokeWidth: 2 }}
+                    stroke="#FF004D" 
+                    strokeWidth={2} 
+                    dot={{ r: 3, fill: '#FF004D', strokeWidth: 0 }} 
+                    activeDot={{ r: 6, stroke: 'white', strokeWidth: 2 }}
                     isAnimationActive={false} 
                   />
                   <Line 
@@ -212,9 +228,9 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                     type="monotone" 
                     dataKey="pressao_sistolica" 
                     name="P. Sistólica" 
-                    stroke="#F59E0B" 
-                    strokeWidth={1.5} 
-                    strokeDasharray="5 5" 
+                    stroke="#FF8A00" 
+                    strokeWidth={2} 
+                    strokeDasharray="6 4" 
                     dot={false} 
                     isAnimationActive={false} 
                   />
@@ -223,9 +239,9 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                     type="monotone" 
                     dataKey="pressao_diastolica" 
                     name="P. Diastólica" 
-                    stroke="#8B5CF6" 
-                    strokeWidth={1.5} 
-                    strokeDasharray="5 5" 
+                    stroke="#9D00FF" 
+                    strokeWidth={2} 
+                    strokeDasharray="6 4" 
                     dot={false} 
                     isAnimationActive={false} 
                   />
@@ -234,7 +250,7 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
             </div>
           </>
         ) : (
-          <div className="text-center py-24 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100 flex flex-col items-center gap-4">
+          <div className="text-center py-24 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center gap-4">
             <span className="relative flex h-5 w-5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-5 w-5 bg-cyan-500"></span>
