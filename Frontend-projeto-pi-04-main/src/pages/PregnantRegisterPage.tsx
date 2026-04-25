@@ -13,7 +13,6 @@ export const initialFormState: FormData = {
     endereco: '', cep: '', cidade: '', estado: '', telefone: ''
 };
 
-// NOVO PADRÃO: 6 LINHAS ESTRATÉGICAS
 const initialScheduleData: RowData[] = [
     { week: '1º Trimestre (Até 12 sem)', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
     { week: '2º Trimestre (13 a 27 sem)', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
@@ -45,13 +44,11 @@ function PregnantRegisterPage() {
         const { id, cronograma, idade, ...restOfData } = gestante;
         setFormData({ ...restOfData, idade: idade.toString() });
         
-        // --- PROTEÇÃO CONTRA FORMATO ANTIGO ---
         if (cronograma && cronograma.length === initialScheduleData.length) {
             setScheduleData(cronograma);
         } else {
             setScheduleData(initialScheduleData);
         }
-        // --------------------------------------
 
         setIsEditing(true);
         setCurrentCpf(gestante.cpf);
@@ -111,7 +108,6 @@ function PregnantRegisterPage() {
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-12">
             
-            {/* O SearchByCpf já contém o Header Moderno, eliminando o texto fantasma */}
             <SearchByCpf 
                 onGestanteFound={onGestanteFound} 
                 onClear={handleClear} 
@@ -143,9 +139,9 @@ function PregnantRegisterPage() {
                         <button 
                             type="submit" 
                             disabled={isLoading} 
-                            className="w-full sm:w-auto bg-[#1a5276] text-white font-black py-4 px-12 rounded-2xl hover:bg-[#154360] transition-all shadow-xl active:scale-95 disabled:bg-gray-300"
+                            className="w-full sm:w-auto bg-[#1a5276] text-white font-black py-4 px-12 rounded-2xl hover:bg-[#154360] transition-all shadow-xl active:scale-95 disabled:bg-gray-300 uppercase tracking-widest"
                         >
-                            {isLoading ? 'REGISTRANDO...' : 'REGISTRAR'}
+                            {isLoading ? 'PROCESSANDO...' : 'REGISTRAR GESTANTE'}
                         </button>
                         <button 
                             type="button" 
@@ -184,10 +180,10 @@ function PregnantRegisterPage() {
                         </div>
                         
                         <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-center gap-4">
-                            <button onClick={handleUpdate} disabled={isLoading} className="bg-[#1a5276] text-white py-4 px-10 rounded-2xl hover:bg-[#154360] transition-all font-black shadow-lg active:scale-95 disabled:bg-gray-300">
+                            <button onClick={handleUpdate} disabled={isLoading} className="bg-[#1a5276] text-white py-4 px-10 rounded-2xl hover:bg-[#154360] transition-all font-black shadow-lg active:scale-95 disabled:bg-gray-300 uppercase tracking-widest">
                                 {isLoading ? 'SALVANDO...' : 'SALVAR ALTERAÇÕES'}
                             </button>
-                            <button type="button" onClick={handleClear} className="bg-gray-100 text-gray-500 font-bold py-4 px-10 rounded-2xl hover:bg-gray-200 transition-all border border-gray-200">
+                            <button type="button" onClick={handleClear} className="bg-gray-100 text-gray-500 font-bold py-4 px-10 rounded-2xl hover:bg-gray-200 transition-all border border-gray-200 uppercase tracking-widest text-xs">
                                 Fechar Prontuário
                             </button>
                         </div>
