@@ -15,12 +15,6 @@ const aplicarMascaraCPF = (value: string) =>
        .replace(/(\d{3})(\d{1,2})/, '$1-$2')
        .substring(0, 14);
 
-const formatarData = (dataString: string) => {
-    if (!dataString) return '';
-    const [ano, mes, dia] = dataString.split('-');
-    return `${dia}/${mes}/${ano}`;
-};
-
 interface SearchByCpfProps {
     onGestanteFound: (gestante: IGestante) => void;
     onClear: () => void;
@@ -68,36 +62,25 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
 
     return (
         <div className="max-w-4xl mx-auto px-4">
-            {/* Banner Principal Atualizado - Estilo Suzano Digital */}
+            {/* Banner Principal Estilo Suzano */}
             <div className="bg-gradient-to-br from-[#1a5276] via-[#154360] to-[#0e2a3b] p-10 rounded-3xl shadow-2xl mb-10 text-white relative overflow-hidden border-b-4 border-blue-400">
-                
-                {/* Elemento Decorativo de Fundo */}
-                <div className="absolute right-[-20px] top-[-20px] opacity-10 pointer-events-none">
-                    <svg width="220" height="220" viewBox="0 0 24 24" fill="white">
-                        <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" />
-                    </svg>
-                </div>
-
                 <div className="relative z-10">
-                    {/* Selo de Localização */}
                     <div className="inline-flex items-center gap-2 bg-blue-500/20 backdrop-blur-md border border-blue-400/30 px-3 py-1 rounded-full mb-6">
                         <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">
                             Sistema Municipal • Suzano
                         </span>
                     </div>
-
-                    <h1 className="text-4xl md:text-5xl font-black mb-3 tracking-tighter">
+                    <h1 className="text-4xl md:text-5xl font-black mb-3 tracking-tighter text-white">
                         REDE <span className="text-blue-400">CEGONHA</span>
                     </h1>
-                    
                     <p className="text-lg text-blue-100 font-medium max-w-xl leading-relaxed">
                         Gestão de prontuários e monitoramento de sinais vitais <span className="text-white font-bold">em tempo real.</span>
                     </p>
                 </div>
             </div>
 
-            {/* Seção de Busca - Mantendo o botão que você gostou */}
+            {/* Seção de Busca */}
             <section className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                 <SectionTitle title="Acessar Cadastro" />
                 
@@ -120,13 +103,10 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
                     </button>
                 </div>
 
-                {/* Mensagens de Feedback e Resultados */}
                 <div className="mt-6 min-h-[4rem]">
                     {error && (
                         <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg animate-pulse">
-                            <p className="text-red-700 text-sm font-bold">
-                                ⚠️ {error}
-                            </p>
+                            <p className="text-red-700 text-sm font-bold">⚠️ {error}</p>
                         </div>
                     )}
 
@@ -134,12 +114,13 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
                         <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 border-l-emerald-500 shadow-sm transition-all">
                             <div>
                                 <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">Paciente Identificada</p>
-                                <h3 className="text-xl font-black text-emerald-900">{gestanteEncontrada.nome}</h3>
-                                <p className="text-sm text-emerald-700 font-medium">CPF: {aplicarMascaraCPF(gestanteEncontrada.cpf)}</p>
+                                <h3 className="text-xl font-black text-emerald-900 uppercase tracking-tighter">{gestanteEncontrada.nome}</h3>
+                                <p className="text-sm text-emerald-700 font-medium italic">CPF: {aplicarMascaraCPF(gestanteEncontrada.cpf)}</p>
                             </div>
                             <div className="text-right border-t md:border-t-0 md:border-l border-emerald-200 pt-3 md:pt-0 md:pl-6">
-                                <p className="text-[10px] font-bold text-emerald-600 uppercase mb-1">Nascimento</p>
-                                <p className="text-lg font-black text-emerald-900">{formatarData(gestanteEncontrada.data_nascimento)}</p>
+                                <p className="text-[10px] font-bold text-emerald-600 uppercase mb-1 tracking-widest">Idade</p>
+                                {/* AQUI: Agora exibe a idade na busca */}
+                                <p className="text-2xl font-black text-emerald-900">{gestanteEncontrada.idade} anos</p>
                             </div>
                         </div>
                     )}
