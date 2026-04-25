@@ -1,5 +1,4 @@
 import React from 'react';
-// Correção 1: Importação do tipo usando 'type'
 import type { RowData } from '../types';
 
 interface PrenatalScheduleProps {
@@ -7,13 +6,11 @@ interface PrenatalScheduleProps {
   setScheduleData: React.Dispatch<React.SetStateAction<RowData[]>>;
 }
 
-// Correção 2: Mapeamento exato dos nomes que seu 'types.ts' usa
-// Se no seu erro diz que 'pending' não existe, vamos garantir que o objeto aceite qualquer string de status
 const statusConfig: Record<string, { label: string; color: string; icon: string }> = {
-  done: { label: 'Realizado', color: 'bg-emerald-500 text-white', icon: '✓' },
-  upcoming: { label: 'Pendente', color: 'bg-rose-100 text-rose-600 border-rose-200', icon: '!' },
-  pending: { label: 'Pendente', color: 'bg-rose-100 text-rose-600 border-rose-200', icon: '!' },
-  scheduled: { label: 'Agendado', color: 'bg-blue-500 text-white', icon: '◔' },
+  done: { label: 'Realizado', color: 'bg-emerald-500 text-white border-emerald-600', icon: '✓' },
+  upcoming: { label: 'Pendente', color: 'bg-rose-50 text-rose-500 border-rose-200', icon: '!' },
+  pending: { label: 'Pendente', color: 'bg-rose-50 text-rose-500 border-rose-200', icon: '!' },
+  scheduled: { label: 'Agendado', color: 'bg-blue-500 text-white border-blue-600', icon: '◔' },
 };
 
 const PrenatalSchedule: React.FC<PrenatalScheduleProps> = ({ scheduleData, setScheduleData }) => {
@@ -21,8 +18,6 @@ const PrenatalSchedule: React.FC<PrenatalScheduleProps> = ({ scheduleData, setSc
   const toggleStatus = (rowIndex: number, cellIndex: number) => {
     const newData = [...scheduleData];
     const currentStatus = newData[rowIndex].cells[cellIndex].status;
-    
-    // Correção 3: Forçar o TypeScript a aceitar os tipos de status
     const statusOrder = ['upcoming', 'scheduled', 'done'] as const;
     const currentIndex = statusOrder.indexOf(currentStatus as any);
     const nextStatus = statusOrder[(currentIndex + 1) % statusOrder.length];
@@ -50,7 +45,7 @@ const PrenatalSchedule: React.FC<PrenatalScheduleProps> = ({ scheduleData, setSc
 
         <div className="flex gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
           {['done', 'pending', 'scheduled'].map((key) => (
-            <div key={key} className="flex items-center gap-1.5">
+            <div key={key} className="flex items-center gap-1.5 px-2">
               <span className={`w-3 h-3 rounded-full ${statusConfig[key].color.split(' ')[0]}`}></span>
               <span className="text-[9px] font-black text-gray-500 uppercase">{statusConfig[key].label}</span>
             </div>
@@ -58,13 +53,13 @@ const PrenatalSchedule: React.FC<PrenatalScheduleProps> = ({ scheduleData, setSc
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm bg-white">
-        <table className="w-full text-left border-collapse">
+      <div className="overflow-x-auto rounded-2xl border-2 border-gray-100 shadow-xl bg-white">
+        <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
           <thead>
             <tr className="bg-[#1a5276]">
-              <th className="p-4 text-[10px] font-black text-blue-100 uppercase tracking-widest border-b border-blue-800">Semanas</th>
+              <th className="w-40 p-4 text-[10px] font-black text-blue-100 uppercase tracking-widest border-r border-blue-800/30">Semanas</th>
               {columns.map((col, i) => (
-                <th key={i} className="p-4 text-[10px] font-black text-white uppercase tracking-tighter border-b border-blue-800 text-center">
+                <th key={i} className="p-3 text-[9px] font-black text-white uppercase tracking-tighter text-center border-l border-blue-800/30">
                   {col}
                 </th>
               ))}
@@ -72,26 +67,28 @@ const PrenatalSchedule: React.FC<PrenatalScheduleProps> = ({ scheduleData, setSc
           </thead>
           <tbody className="text-gray-700">
             {scheduleData.map((row, rowIndex) => (
-              <tr key={rowIndex} className="hover:bg-blue-50/30 transition-colors border-b border-gray-50 last:border-0 group">
-                <td className="p-4 text-[11px] font-black text-[#1a5276] bg-gray-50/50 group-hover:bg-blue-50 transition-colors">
+              <tr key={rowIndex} className="hover:bg-blue-50/40 transition-colors border-b border-gray-100 last:border-0 group">
+                <td className="p-4 text-[11px] font-black text-[#1a5276] bg-gray-50/30 border-r border-gray-100 group-hover:bg-blue-50">
                   {row.week}
                 </td>
                 {row.cells.map((cell, cellIndex) => {
                   const config = statusConfig[cell.status] || statusConfig.pending;
                   return (
-                    <td key={cellIndex} className="p-2 text-center">
-                      <button
-                        type="button"
-                        onClick={() => toggleStatus(rowIndex, cellIndex)}
-                        className={`
-                          w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-black transition-all
-                          hover:scale-110 active:scale-95 shadow-sm border
-                          ${config.color}
-                        `}
-                        title="Clique para alternar status"
-                      >
-                        {config.icon}
-                      </button>
+                    <td key={cellIndex} className="p-2 border-l border-gray-50">
+                      <div className="flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => toggleStatus(rowIndex, cellIndex)}
+                          className={`
+                            w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black transition-all
+                            hover:scale-110 active:scale-95 shadow-md border-2
+                            ${config.color}
+                          `}
+                          title={`${row.week} - ${columns[cellIndex]}`}
+                        >
+                          {config.icon}
+                        </button>
+                      </div>
                     </td>
                   );
                 })}
@@ -100,6 +97,10 @@ const PrenatalSchedule: React.FC<PrenatalScheduleProps> = ({ scheduleData, setSc
           </tbody>
         </table>
       </div>
+      
+      <p className="text-center text-[10px] text-gray-400 mt-6 font-bold uppercase tracking-widest animate-pulse">
+        🎯 Clique nos ícones para gerenciar o acompanhamento
+      </p>
     </div>
   );
 };
