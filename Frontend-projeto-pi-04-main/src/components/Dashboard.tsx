@@ -6,6 +6,7 @@ import {
 import RiskIndicator from './RiskIndicator';
 import GestationalAgeCard from './GestationalAgeCard';
 
+// Fonte moderna para o gráfico (Recharts)
 const GRAPH_FONT = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
 interface SinaisVitaisData {
@@ -52,7 +53,7 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
 
   const ultimaLeitura = dados.length > 0 ? dados[dados.length - 1] : null;
 
-  // Lógicas de cores dos Cards
+  // Lógica de cores dos Cards baseada no Manual de Ferraz / Protocolos Médicos
   const getBpmStatus = (bpm: number) => {
     if (bpm >= 110 || bpm <= 60) return { label: 'CRÍTICO', bg: 'bg-red-600', border: 'border-red-800', text: 'text-white', pulse: 'animate-pulse shadow-lg shadow-red-200' };
     if (bpm >= 100) return { label: 'ATENÇÃO', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600', pulse: '' };
@@ -72,7 +73,7 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
 
   const getO2Status = (o2: number) => {
     if (o2 < 95) return { label: 'BAIXA', bg: 'bg-red-600', border: 'border-red-800', text: 'text-white', pulse: 'animate-pulse shadow-lg shadow-red-200' };
-    return { label: 'NORMAL', bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-700', pulse: '' };
+    return { label: 'NORMAL', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', pulse: '' };
   };
 
   return (
@@ -97,12 +98,12 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
               
-              {/* Card 1: BPM */}
+              {/* Card 1: Frequência Cardíaca */}
               {(() => {
                 const status = getBpmStatus(ultimaLeitura.batimentos);
                 return (
                   <div className={`p-5 rounded-2xl border-2 transition-all duration-700 ${status.bg} ${status.border} ${status.text} ${status.pulse}`}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">Freq. Cardíaca</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">Frequência Cardíaca</p>
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-4xl font-black tracking-tighter">{Math.round(ultimaLeitura.batimentos)}</span>
                       <span className="text-xs font-bold opacity-80 uppercase">BPM</span>
@@ -142,7 +143,7 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                 );
               })()}
 
-              {/* Card 4: Oxigenação (O2) */}
+              {/* Card 4: Saturação O₂ (Oxigênio) */}
               {(() => {
                 const status = getO2Status(ultimaLeitura.oxigenacao);
                 return (
@@ -159,25 +160,26 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
 
             </div>
 
+            {/* --- ÁREA DO GRÁFICO REFINADA --- */}
             <div className="h-[320px] w-full bg-white rounded-2xl p-5 border-2 border-gray-100 shadow-inner">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={dados} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                   
-                  {/* GRID COM TRAÇOS VERTICAIS E HORIZONTAIS */}
-                  <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#D1D5DB" />
+                  {/* GRADE DO FUNDO (TRAÇOS) */}
+                  <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#E5E7EB" />
                   
                   <XAxis 
                     dataKey="horaCurta" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{fontSize: 11, fill: '#6B7280', fontFamily: GRAPH_FONT, fontWeight: 600}} 
+                    tick={{fontSize: 11, fill: '#6B7280', fontFamily: GRAPH_FONT, fontWeight: 500}} 
                     minTickGap={60} 
                   />
                   <YAxis 
                     yAxisId="left" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{fontSize: 11, fill: '#6B7280', fontFamily: GRAPH_FONT, fontWeight: 600}} 
+                    tick={{fontSize: 11, fill: '#6B7280', fontFamily: GRAPH_FONT, fontWeight: 500}} 
                     domain={[40, 180]} 
                   />
                   <YAxis yAxisId="right" orientation="right" domain={[80, 100]} hide />
@@ -191,36 +193,35 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                   
                   <Legend 
                     iconType="circle" 
-                    iconSize={10}
+                    iconSize={8}
                     verticalAlign="top" 
                     align="right" 
                     height={50} 
-                    wrapperStyle={{ fontSize: '12px', fontFamily: GRAPH_FONT, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 800, color: '#111827', paddingBottom: '20px' }} 
+                    wrapperStyle={{ fontSize: '11px', fontFamily: GRAPH_FONT, textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 800, color: '#333', paddingBottom: '20px' }} 
                   />
                   
-                  {/* Área de Oxigênio (Mais visível e com borda forte) */}
+                  {/* Área de Oxigênio (Azul ultra suave, sem bordas fortes) */}
                   <Area 
                     yAxisId="right" 
                     type="monotone" 
                     dataKey="oxigenacao" 
                     name="Saturação O₂"
-                    fill="#BFDBFE" 
-                    fillOpacity={0.4}
-                    stroke="#007BFF" 
-                    strokeWidth={2}
+                    fill="#EFF6FF" // Azul pastel bem clarinho (blue-50)
+                    fillOpacity={0.5} // Mantive a transparência sutil
+                    stroke="none" // REMOVI A BORDA FORTE QUE ESTAVA FEIA
                     isAnimationActive={false} 
                   />
                   
-                  {/* Linhas Principais (Cores "Neon" super vivas) */}
+                  {/* Linhas Principais REFINADAS (Espessura = 1.5) */}
                   <Line 
                     yAxisId="left" 
                     type="monotone" 
                     dataKey="batimentos" 
                     name="Frequência Cardíaca" 
-                    stroke="#FF004D" 
-                    strokeWidth={2} 
-                    dot={{ r: 3, fill: '#FF004D', strokeWidth: 0 }} 
-                    activeDot={{ r: 6, stroke: 'white', strokeWidth: 2 }}
+                    stroke="#EF4444" 
+                    strokeWidth={1.5} // LINHA FINA E REFINADA
+                    dot={{ r: 2, fill: '#EF4444', strokeWidth: 0 }} 
+                    activeDot={{ r: 5, stroke: 'white', strokeWidth: 2 }}
                     isAnimationActive={false} 
                   />
                   <Line 
@@ -228,9 +229,9 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                     type="monotone" 
                     dataKey="pressao_sistolica" 
                     name="P. Sistólica" 
-                    stroke="#FF8A00" 
-                    strokeWidth={2} 
-                    strokeDasharray="6 4" 
+                    stroke="#F59E0B" 
+                    strokeWidth={1.5} // LINHA FINA E REFINADA
+                    strokeDasharray="5 5" // Traçado discreto
                     dot={false} 
                     isAnimationActive={false} 
                   />
@@ -239,9 +240,9 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                     type="monotone" 
                     dataKey="pressao_diastolica" 
                     name="P. Diastólica" 
-                    stroke="#9D00FF" 
-                    strokeWidth={2} 
-                    strokeDasharray="6 4" 
+                    stroke="#8B5CF6" 
+                    strokeWidth={1.5} // LINHA FINA E REFINADA
+                    strokeDasharray="5 5" // Traçado discreto
                     dot={false} 
                     isAnimationActive={false} 
                   />
@@ -250,7 +251,7 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
             </div>
           </>
         ) : (
-          <div className="text-center py-24 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center gap-4">
+          <div className="text-center py-24 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100 flex flex-col items-center gap-4">
             <span className="relative flex h-5 w-5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-5 w-5 bg-cyan-500"></span>
