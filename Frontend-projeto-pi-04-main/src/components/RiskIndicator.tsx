@@ -32,7 +32,7 @@ const RiskIndicator: React.FC<RiskIndicatorProps> = ({ cpf }) => {
         `/api/risco/${cpf}?sangramento=${sangramento ? 1 : 0}&cefaleia=${cefaleia ? 1 : 0}&edema=${edema ? 1 : 0}`
       );
       setRisk(response.data.risco);
-      setPontos(response.data.pontuacao_total);
+      setPontos(response.data.pontuacao_total); // Certifique-se que o backend retorna 'pontuacao_total'
     } catch (error) {
       console.error("Erro ao buscar risco:", error);
     } finally {
@@ -83,11 +83,15 @@ const RiskIndicator: React.FC<RiskIndicatorProps> = ({ cpf }) => {
         </div>
       </div>
 
-      {/* RESULTADO DO RISCO */}
+      {/* RESULTADO DO RISCO - AQUI ESTÁ O AJUSTE */}
       <div className={`p-6 rounded-lg border-2 text-center transition-all duration-500 ${style}`}>
         <h3 className="font-bold text-lg">Status de Risco Gestacional</h3>
-        <p className="text-4xl font-extrabold my-2">{risk || 'N/A'}</p>
-        <p className="text-sm opacity-80 font-medium">Pontuação Total: {pontos} pontos</p>
+        <p className="text-4xl font-extrabold my-2">{risk || 'Baixo'}</p>
+        
+        {/* Melhorei o destaque do número aqui para não ficar escondido */}
+        <p className="text-sm font-bold mt-2">
+          Pontuação Total: <span className="text-xl underline">{pontos}</span> pontos
+        </p>
       </div>
     </div>
   );
