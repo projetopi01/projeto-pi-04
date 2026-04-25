@@ -1,85 +1,89 @@
 import React from 'react';
-
-type CellStatus = 'pending' | 'completed' | 'upcoming';
-interface CellData { text: string; status: CellStatus; }
-interface RowData { week: string; cells: CellData[]; }
-
-const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
-    <h2 className="text-2xl font-bold text-center text-[#1a5276] mb-6">{title}</h2>
-);
+import { RowData, CellData } from '../types';
 
 interface PrenatalScheduleProps {
   scheduleData: RowData[];
   setScheduleData: React.Dispatch<React.SetStateAction<RowData[]>>;
 }
 
-function PrenatalSchedule({ scheduleData, setScheduleData }: PrenatalScheduleProps) {
+const statusConfig = {
+  done: { label: 'Realizado', color: 'bg-emerald-500 text-white', icon: '✓' },
+  upcoming: { label: 'Pendente', color: 'bg-rose-100 text-rose-600 border-rose-200', icon: '!' },
+  scheduled: { label: 'Agendado', color: 'bg-blue-500 text-white', icon: '◔' },
+};
 
-  const handleStatusChange = (rowIndex: number, cellIndex: number) => {
-    const newSchedule = JSON.parse(JSON.stringify(scheduleData));
-    const currentStatus = newSchedule[rowIndex].cells[cellIndex].status;
-
-    let nextStatus: CellStatus = 'pending';
-    if (currentStatus === 'pending') nextStatus = 'completed';
-    else if (currentStatus === 'completed') nextStatus = 'upcoming';
-    else if (currentStatus === 'upcoming') nextStatus = 'pending';
-
-    newSchedule[rowIndex].cells[cellIndex].status = nextStatus;
-    setScheduleData(newSchedule);
-  };
-
-  const handleTextChange = (event: React.FocusEvent<HTMLTableCellElement>, rowIndex: number, cellIndex: number) => {
-    const newSchedule = JSON.parse(JSON.stringify(scheduleData));
-    newSchedule[rowIndex].cells[cellIndex].text = event.currentTarget.textContent || '';
-    setScheduleData(newSchedule);
-  };
+const PrenatalSchedule: React.FC<PrenatalScheduleProps> = ({ scheduleData, setScheduleData }) => {
   
-  // Cores mais modernas e suaves (estilo SaaS médico)
-  const statusClasses: Record<CellStatus, string> = {
-    pending: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100',
-    completed: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
-    upcoming: 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100',
+  const toggleStatus = (rowIndex: number, cellIndex: number) => {
+    const newData = [...scheduleData];
+    const currentStatus = newData[rowIndex].cells[cellIndex].status;
+    
+    const statusOrder: ('upcoming' | 'scheduled' | 'done')[] = ['upcoming', 'scheduled', 'done'];
+    const nextIndex = (statusOrder.indexOf(currentStatus) + 1) % statusOrder.length;
+    
+    newData[rowIndex].cells[cellIndex].status = statusOrder[nextIndex];
+    setScheduleData(newData);
   };
 
-  const tableHeaders = [
-      'Abertura', 'Consulta', 'Odonto', 'Laboratório',
-      'Testes Rápidos', 'Radiologia', 'Toxoplas.', 'SUAB', 'Laqueadura', 'Vacinas'
+  const columns = [
+    "Abertura", "Consulta", "Odonto", "Laborat.", "Testes R.", 
+    "Radio.", "Toxoplas.", "SUAB", "Laquead.", "Vacinas"
   ];
 
   return (
-    <section className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-      <SectionTitle title="Cronograma Pré-Natal Municipal" />
-      
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <table className="w-full border-collapse text-[11px] text-center">
+    <div className="mt-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        <div>
+          <h3 className="text-xl font-black text-[#1a5276] tracking-tighter uppercase italic">
+            Cronograma Pré-Natal Municipal
+          </h3>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+            Protocolo de Acompanhamento • Suzano/SP
+          </p>
+        </div>
+
+        {/* Legenda Simplificada */}
+        <div className="flex gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
+          {Object.entries(statusConfig).map(([key, value]) => (
+            <div key={key} className="flex items-center gap-1.5">
+              <span className={`w-3 h-3 rounded-full ${value.color.split(' ')[0]}`}></span>
+              <span className="text-[9px] font-black text-gray-500 uppercase">{value.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm bg-white">
+        <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-[#1a5276] text-white">
-              <th className="p-3 border-r border-blue-400/30 font-bold uppercase tracking-wider">Semana</th>
-              {tableHeaders.map(header => (
-                <th key={header} className="p-3 border-r border-blue-400/30 font-semibold leading-tight">
-                  {header}
+            <tr className="bg-[#1a5276]">
+              <th className="p-4 text-[10px] font-black text-blue-100 uppercase tracking-widest border-b border-blue-800">Semanas</th>
+              {columns.map((col, i) => (
+                <th key={i} className="p-4 text-[10px] font-black text-white uppercase tracking-tighter border-b border-blue-800 text-center">
+                  {col}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="text-gray-700">
             {scheduleData.map((row, rowIndex) => (
-              <tr key={rowIndex} className="hover:bg-gray-50 transition-colors">
-                <td className="p-3 border-r border-gray-200 font-bold bg-gray-50 text-[#1a5276] sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0,05)]">
+              <tr key={rowIndex} className="hover:bg-blue-50/30 transition-colors border-b border-gray-50 last:border-0 group">
+                <td className="p-4 text-[11px] font-black text-[#1a5276] bg-gray-50/50 group-hover:bg-blue-50 transition-colors">
                   {row.week}
                 </td>
                 {row.cells.map((cell, cellIndex) => (
-                  <td
-                    key={cellIndex}
-                    onClick={() => handleStatusChange(rowIndex, cellIndex)}
-                    onBlur={(e) => handleTextChange(e, rowIndex, cellIndex)}
-                    contentEditable={true}
-                    suppressContentEditableWarning={true}
-                    className={`p-3 border-r border-gray-200 cursor-pointer transition-all duration-200 min-w-[80px] h-12 align-middle font-medium
-                      ${statusClasses[cell.status]} 
-                      ${cell.status === 'completed' ? 'italic opacity-80' : ''}`}
-                  >
-                    {cell.text}
+                  <td key={cellIndex} className="p-2 text-center">
+                    <button
+                      onClick={() => toggleStatus(rowIndex, cellIndex)}
+                      className={`
+                        w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-black transition-all
+                        hover:scale-110 active:scale-95 shadow-sm border
+                        ${statusConfig[cell.status].color}
+                      `}
+                      title="Clique para alternar status"
+                    >
+                      {statusConfig[cell.status].icon}
+                    </button>
                   </td>
                 ))}
               </tr>
@@ -87,24 +91,12 @@ function PrenatalSchedule({ scheduleData, setScheduleData }: PrenatalSchedulePro
           </tbody>
         </table>
       </div>
-
-      <div className="mt-6 flex flex-wrap justify-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-emerald-100 border border-emerald-300"></span> Realizado
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-amber-100 border border-amber-300"></span> Pendente
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-sky-100 border border-sky-300"></span> Agendado
-        </div>
-      </div>
-
-      <p className="text-[10px] text-gray-400 mt-4 text-center italic">
-        Dica: Clique para alternar status • Edite o texto diretamente na célula
+      
+      <p className="text-center text-[10px] text-gray-400 mt-4 font-medium italic">
+        Dica: Clique nos ícones coloridos para atualizar o status de cada procedimento.
       </p>
-    </section>
+    </div>
   );
-}
+};
 
 export default PrenatalSchedule;
