@@ -141,7 +141,7 @@ function PregnantRegisterPage() {
                             disabled={isLoading} 
                             className="w-full sm:w-auto bg-[#1a5276] text-white font-black py-4 px-12 rounded-2xl hover:bg-[#154360] transition-all shadow-xl active:scale-95 disabled:bg-gray-300 uppercase tracking-widest"
                         >
-                            {isLoading ? 'PROCESSANDO...' : 'REGISTRAR GESTANTE'}
+                            {isLoading ? 'PROCESSANDO...' : 'REGISTRAR '}
                         </button>
                         <button 
                             type="button" 
@@ -184,7 +184,7 @@ function PregnantRegisterPage() {
                                 {isLoading ? 'SALVANDO...' : 'SALVAR ALTERAÇÕES'}
                             </button>
                             <button type="button" onClick={handleClear} className="bg-gray-100 text-gray-500 font-bold py-4 px-10 rounded-2xl hover:bg-gray-200 transition-all border border-gray-200 uppercase tracking-widest text-xs">
-                                Fechar Prontuário
+                                Fechar
                             </button>
                         </div>
                     </div>
