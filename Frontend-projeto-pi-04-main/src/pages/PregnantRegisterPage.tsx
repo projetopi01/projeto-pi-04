@@ -4,7 +4,7 @@ import axios from 'axios';
 import SearchByCpf from '../components/SearchByCpf';
 import RegistrationForm from '../components/RegistrationForm';
 import PrenatalSchedule from '../components/PrenatalSchedule';
-import WeeksCalculator from '../components/WeeksCalculator';
+// IMPORTANTE: Removi o WeeksCalculator daqui, pois o Dashboard já faz isso agora com o GestationalAgeCard!
 import Dashboard from '../components/Dashboard';
 import type { IGestante, FormData, RowData } from '../types';
 
@@ -41,9 +41,6 @@ function PregnantRegisterPage() {
     const [currentCpf, setCurrentCpf] = useState('');
     const [lastRegistered, setLastRegistered] = useState<IGestante | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [lastMenstruation, setLastMenstruation] = useState('');
-    const [gestationalWeeks, setGestationalWeeks] = useState<number | null>(null);
-    const [calculatorMessage, setCalculatorMessage] = useState('');
 
     const onGestanteFound = (gestante: IGestante) => {
         const { id, cronograma, idade, ...restOfData } = gestante;
@@ -61,9 +58,6 @@ function PregnantRegisterPage() {
         setIsEditing(false);
         setCurrentCpf('');
         setMessage(null);
-        setLastMenstruation('');
-        setGestationalWeeks(null);
-        setCalculatorMessage('');
         window.scroll({ top: 0, behavior: 'smooth' });
     };
 
@@ -91,8 +85,6 @@ function PregnantRegisterPage() {
             setLastRegistered(response.data);
             setFormData(initialFormState);
             setScheduleData(initialScheduleData);
-            setLastMenstruation('');
-            setGestationalWeeks(null);
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) setMessage({ type: 'error', text: error.response.data.error || 'Erro.' });
             else setMessage({ type: 'error', text: 'Erro de conexão.' });
@@ -129,7 +121,6 @@ function PregnantRegisterPage() {
             {!isEditing ? (
                 <form onSubmit={handleSubmit}>
                     <RegistrationForm formData={formData} setFormData={setFormData} />
-                    <WeeksCalculator lastMenstruation={lastMenstruation} setLastMenstruation={setLastMenstruation} gestationalWeeks={gestationalWeeks} setGestationalWeeks={setGestationalWeeks} message={calculatorMessage} setMessage={setCalculatorMessage} />
                     <PrenatalSchedule scheduleData={scheduleData} setScheduleData={setScheduleData} />
                     <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
 
@@ -153,7 +144,9 @@ function PregnantRegisterPage() {
                 <div className="bg-white p-6 rounded-lg shadow-md mb-8">
                     <SectionTitle title={`Editando Cronograma de ${formData.nome}`} />
 
-                    <Dashboard cpf={currentCpf} />
+                    {/* --- AQUI ESTÁ A MÁGICA --- */}
+                    {/* Agora o Dashboard recebe a data da última menstruação para calcular a barra! */}
+                    <Dashboard cpf={currentCpf} dum={formData.ultima_menstruacao} />
 
                     <PrenatalSchedule scheduleData={scheduleData} setScheduleData={setScheduleData} />
                     <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
