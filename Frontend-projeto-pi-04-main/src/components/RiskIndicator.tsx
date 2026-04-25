@@ -16,7 +16,6 @@ const RiskIndicator: React.FC<RiskIndicatorProps> = ({ cpf }) => {
   const [pontos, setPontos] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   
-  // ESTADO DOS SINTOMAS (MANUAL DE FERRAZ)
   const [sintomas, setSintomas] = useState({
     sangramento: false,
     cefaleia: false,
@@ -26,13 +25,13 @@ const RiskIndicator: React.FC<RiskIndicatorProps> = ({ cpf }) => {
   const fetchRisk = useCallback(async () => {
     if (!cpf) return;
     try {
-      // Enviamos os sintomas como parâmetros na URL (Query Params)
       const { sangramento, cefaleia, edema } = sintomas;
+      // A API recebe os sintomas e calcula junto com os sinais vitais do banco
       const response = await api.get(
         `/api/risco/${cpf}?sangramento=${sangramento ? 1 : 0}&cefaleia=${cefaleia ? 1 : 0}&edema=${edema ? 1 : 0}`
       );
       setRisk(response.data.risco);
-      setPontos(response.data.pontuacao_total); // Certifique-se que o backend retorna 'pontuacao_total'
+      setPontos(response.data.pontuacao_total);
     } catch (error) {
       console.error("Erro ao buscar risco:", error);
     } finally {
@@ -56,11 +55,12 @@ const RiskIndicator: React.FC<RiskIndicatorProps> = ({ cpf }) => {
 
   return (
     <div className="space-y-4">
-      {/* SEÇÃO DE AVALIAÇÃO CLÍNICA - PROTOCOLO FERRAZ */}
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <h4 className="text-sm font-bold text-blue-800 mb-3 uppercase tracking-wider text-center">
-          Avaliação Clínica Manual (Protocolo Ferraz 2025)
+        <h4 className="text-sm font-bold text-blue-800 mb-3 uppercase tracking-wider text-center translate-no">
+          Avaliação Clínica (Protocolo Ferraz 2025)
         </h4>
+        
+        {/* BOTÕES DE SINTOMAS */}
         <div className="flex flex-wrap justify-center gap-3">
           <button 
             onClick={() => toggleSintoma('sangramento')}
@@ -81,17 +81,25 @@ const RiskIndicator: React.FC<RiskIndicatorProps> = ({ cpf }) => {
             {sintomas.edema ? '✓ Edema (Inchaço)' : '+ Edema (Inchaço)'}
           </button>
         </div>
+
+        <p className="text-[10px] text-center text-blue-400 mt-3 italic">
+          * A pontuação considera sintomas manuais + sinais vitais do prontuário.
+        </p>
       </div>
 
-      {/* RESULTADO DO RISCO - AQUI ESTÁ O AJUSTE */}
+      {/* RESULTADO DO RISCO */}
       <div className={`p-6 rounded-lg border-2 text-center transition-all duration-500 ${style}`}>
-        <h3 className="font-bold text-lg">Status de Risco Gestacional</h3>
-        <p className="text-4xl font-extrabold my-2">{risk || 'Baixo'}</p>
+        <h3 className="font-bold text-lg uppercase tracking-tighter">Status de Risco Gestacional</h3>
+        <p className="text-5xl font-black my-2 uppercase italic tracking-tighter">{risk || 'Avaliar'}</p>
         
-        {/* Melhorei o destaque do número aqui para não ficar escondido */}
-        <p className="text-sm font-bold mt-2">
-          Pontuação Total: <span className="text-xl underline">{pontos}</span> pontos
-        </p>
+        <div className="mt-2 pt-2 border-t border-black/10">
+            <p className="text-sm font-medium">
+              Pontuação Total: <span className="text-2xl font-black underline">{pontos}</span> pontos
+            </p>
+            <p className="text-[10px] font-bold opacity-70 uppercase mt-1">
+                {pontos >= 6 ? '⚠️ Necessita avaliação hospitalar imediata' : 'Acompanhamento de rotina na UBS'}
+            </p>
+        </div>
       </div>
     </div>
   );
