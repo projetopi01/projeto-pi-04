@@ -34,34 +34,40 @@ function PrenatalSchedule({ scheduleData, setScheduleData }: PrenatalSchedulePro
     setScheduleData(newSchedule);
   };
   
+  // Cores mais modernas e suaves (estilo SaaS médico)
   const statusClasses: Record<CellStatus, string> = {
-    pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
-    completed: 'bg-green-100 text-green-800 hover:bg-green-200',
-    upcoming: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+    pending: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100',
+    completed: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
+    upcoming: 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100',
   };
 
   const tableHeaders = [
-      'Abertura do Pré-Natal', 'Consulta inicial', 'Avaliação odontológica', 'Exames laboratoriais',
-      'Sorologias e Teste rápido', 'Exames Radiológicos', 'Toxoplasmose', 'SUAB', 'Laqueadura', 'Vacinas'
+      'Abertura', 'Consulta', 'Odonto', 'Laboratório',
+      'Testes Rápidos', 'Radiologia', 'Toxoplas.', 'SUAB', 'Laqueadura', 'Vacinas'
   ];
 
   return (
-    <section className="bg-white p-6 rounded-lg shadow-md">
-      <SectionTitle title="Cronograma Pré-Natal" />
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm text-center">
+    <section className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+      <SectionTitle title="Cronograma Pré-Natal Municipal" />
+      
+      <div className="overflow-x-auto rounded-lg border border-gray-200">
+        <table className="w-full border-collapse text-[11px] text-center">
           <thead>
-            <tr className="bg-gray-200">
-              <th className="p-2 border border-gray-300">Semana</th>
+            <tr className="bg-[#1a5276] text-white">
+              <th className="p-3 border-r border-blue-400/30 font-bold uppercase tracking-wider">Semana</th>
               {tableHeaders.map(header => (
-                <th key={header} className="p-2 border border-gray-300 font-semibold">{header}</th>
+                <th key={header} className="p-3 border-r border-blue-400/30 font-semibold leading-tight">
+                  {header}
+                </th>
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-200">
             {scheduleData.map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                <td className="p-2 border border-gray-300 font-medium bg-gray-50">{row.week}</td>
+              <tr key={rowIndex} className="hover:bg-gray-50 transition-colors">
+                <td className="p-3 border-r border-gray-200 font-bold bg-gray-50 text-[#1a5276] sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0,05)]">
+                  {row.week}
+                </td>
                 {row.cells.map((cell, cellIndex) => (
                   <td
                     key={cellIndex}
@@ -69,7 +75,9 @@ function PrenatalSchedule({ scheduleData, setScheduleData }: PrenatalSchedulePro
                     onBlur={(e) => handleTextChange(e, rowIndex, cellIndex)}
                     contentEditable={true}
                     suppressContentEditableWarning={true}
-                    className={`p-2 border border-gray-300 cursor-pointer transition-colors ${statusClasses[cell.status]}`}
+                    className={`p-3 border-r border-gray-200 cursor-pointer transition-all duration-200 min-w-[80px] h-12 align-middle font-medium
+                      ${statusClasses[cell.status]} 
+                      ${cell.status === 'completed' ? 'italic opacity-80' : ''}`}
                   >
                     {cell.text}
                   </td>
@@ -79,7 +87,22 @@ function PrenatalSchedule({ scheduleData, setScheduleData }: PrenatalSchedulePro
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-gray-500 mt-4 text-center">Clique em uma célula para alterar seu status de cor. </p><p className="text-xs text-gray-500 mt-4 text-center">O texto também é editável.</p>
+
+      <div className="mt-6 flex flex-wrap justify-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-emerald-100 border border-emerald-300"></span> Realizado
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-amber-100 border border-amber-300"></span> Pendente
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-sky-100 border border-sky-300"></span> Agendado
+        </div>
+      </div>
+
+      <p className="text-[10px] text-gray-400 mt-4 text-center italic">
+        Dica: Clique para alternar status • Edite o texto diretamente na célula
+      </p>
     </section>
   );
 }
