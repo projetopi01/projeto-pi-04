@@ -34,9 +34,11 @@ const GestationalAgeCard: React.FC<GestationalAgeProps> = ({ dum }) => {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 relative overflow-hidden h-full flex flex-col justify-between">
+      {/* Detalhe visual de fundo */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-full -mr-16 -mt-16 transition-transform hover:scale-110"></div>
 
-      <div className="relative z-10">
+      <div className="relative z-10 h-full flex flex-col">
+        {/* Cabeçalho do Card */}
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-gray-500 font-bold uppercase text-[11px] tracking-widest">
             Idade Gestacional Atual
@@ -50,6 +52,7 @@ const GestationalAgeCard: React.FC<GestationalAgeProps> = ({ dum }) => {
           </span>
         </div>
 
+        {/* Número das Semanas */}
         <div className="flex items-baseline gap-3 mb-4">
           <span className="text-6xl font-black text-[#1a5276] tabular-nums tracking-tighter">
             {semanas}
@@ -62,23 +65,36 @@ const GestationalAgeCard: React.FC<GestationalAgeProps> = ({ dum }) => {
           </div>
         </div>
 
+        {/* Barra de Progresso e Informações Finais */}
         <div className="mt-auto pt-4">
           <div className="flex justify-between text-[10px] mb-1.5 font-bold text-gray-400 uppercase">
             <span>Início</span>
-            <span className="text-[#1a5276]">Semana {semanas}</span>
+            <span className="text-[#1a5276] font-black">Semana {semanas}</span>
             <span>40 Sem</span>
           </div>
+          
           <div className="w-full bg-gray-100 h-3.5 rounded-full overflow-hidden p-0.5 border border-gray-200 shadow-inner">
             <div 
               className="h-full rounded-full bg-gradient-to-r from-sky-400 via-blue-500 to-[#1a5276] transition-all duration-1000 shadow-sm"
               style={{ width: `${porcentagem}%` }}
             ></div>
           </div>
-          <p className="mt-3 text-[11px] text-gray-400 text-center font-medium">
-            {semanas >= 37 
-              ? "Próximo ao parto (Gestação a termo)" 
-              : `Faltam ${40 - semanas} semanas para o parto.`}
-          </p>
+
+          {/* Frases Dinâmicas que substituem o texto estranho */}
+          <div className="mt-4 text-center">
+            <p className="text-[11px] text-gray-600 font-bold bg-gray-50 py-1.5 rounded-lg border border-gray-100">
+              {semanas < 13 && "🌱 Fase de formação dos órgãos"}
+              {semanas >= 13 && semanas < 27 && "👶 Fase de crescimento e movimentos"}
+              {semanas >= 27 && semanas < 37 && "🧠 Fase de amadurecimento final"}
+              {semanas >= 37 && "✅ Gestação a termo (Pronto para o parto)"}
+            </p>
+            
+            <p className="mt-2 text-[10px] text-gray-400 font-medium">
+              {semanas >= 37 
+                ? "A qualquer momento o bebê poderá nascer." 
+                : `Faltam aproximadamente ${40 - semanas} semanas para o parto.`}
+            </p>
+          </div>
         </div>
       </div>
     </div>
