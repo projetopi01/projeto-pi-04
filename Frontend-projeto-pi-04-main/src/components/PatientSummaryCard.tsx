@@ -23,7 +23,10 @@ const PatientSummaryCard: React.FC<PatientSummaryCardProps> = ({ patient, onEdit
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-800 uppercase">{patient.nome}</h2>
-            <p className="text-sm text-gray-500 font-medium">CPF: {patient.cpf} • Idade: {patient.idade || 'N/I'} anos</p>
+            {/* TROCA REALIZADA: Sai Idade, entra Data de Nascimento */}
+            <p className="text-sm text-gray-500 font-medium">
+                CPF: {patient.cpf} • Nascimento: {formatData(patient.data_nascimento)}
+            </p>
           </div>
         </div>
 
