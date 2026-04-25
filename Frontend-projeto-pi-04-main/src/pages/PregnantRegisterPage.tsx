@@ -44,7 +44,17 @@ function PregnantRegisterPage() {
     const onGestanteFound = (gestante: IGestante) => {
         const { id, cronograma, idade, ...restOfData } = gestante;
         setFormData({ ...restOfData, idade: idade.toString() });
-        setScheduleData(cronograma || initialScheduleData);
+        
+        // --- LÓGICA DE PROTEÇÃO DO NOVO FORMATO ---
+        // Se o cronograma do banco não tiver exatamente 6 linhas, ignoramos e usamos o padrão novo
+        if (cronograma && cronograma.length === initialScheduleData.length) {
+            setScheduleData(cronograma);
+        } else {
+            setScheduleData(initialScheduleData);
+            console.warn("Cronograma antigo convertido para o novo padrão de 6 linhas.");
+        }
+        // ------------------------------------------
+
         setIsEditing(true);
         setCurrentCpf(gestante.cpf);
         setMessage(null);
