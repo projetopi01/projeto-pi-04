@@ -173,10 +173,39 @@ def update_gestante(cpf):
     cpf_limpo = re.sub(r'\D', '', cpf)
     usuario = Usuario.query.filter_by(cpf=cpf_limpo).first_or_404()
     data = request.get_json()
+
+    # 1. Atualiza os dados de texto
+    campos_texto = ['nome', 'nome_mae', 'endereco', 'cep', 'cidade', 'estado', 'telefone']
+    for campo in campos_texto:
+        if campo in data and data[campo] is not None:
+            setattr(usuario, campo, data[campo])
+
+    # 2. Atualiza as datas 
+    try:
+        if 'ultima_menstruacao' in data and data['ultima_menstruacao']:
+            usuario.ultima_menstruacao = parse_date_flexible(data['ultima_menstruacao'])
+        
+        if 'data_prevista_parto' in data and data['data_prevista_parto']:
+            usuario.data_prevista_parto = parse_date_flexible(data['data_prevista_parto'])
+            
+        if 'data_nascimento' in data and data['data_nascimento']:
+            usuario.data_nascimento = parse_date_flexible(data['data_nascimento'])
+            # Recalcula a idade se a data de nascimento mudar
+            usuario.idade = (datetime.now() - usuario.data_nascimento).days // 365
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+
+    # 3. Mantém a atualização do cronograma
     if 'cronograma' in data:
         usuario.cronograma = data['cronograma']
-    db.session.commit()
-    return jsonify(usuario.to_dict()), 200
+
+    # 4. Salva no banco de dados
+    try:
+        db.session.commit()
+        return jsonify(usuario.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Erro ao atualizar no banco', 'details': str(e)}), 500
 
 @app.route('/api/sinais-vitais/<cpf>', methods=['POST'])
 @login_required
