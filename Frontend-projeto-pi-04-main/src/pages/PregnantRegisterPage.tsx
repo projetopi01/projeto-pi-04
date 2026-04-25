@@ -5,7 +5,7 @@ import SearchByCpf from '../components/SearchByCpf';
 import RegistrationForm from '../components/RegistrationForm';
 import PrenatalSchedule from '../components/PrenatalSchedule';
 import Dashboard from '../components/Dashboard';
-import PatientSummaryCard from '../components/PatientSummaryCard'; // <-- IMPORTAMOS O CARD AQUI
+import PatientSummaryCard from '../components/PatientSummaryCard'; 
 import type { IGestante, FormData, RowData } from '../types';
 
 export const initialFormState: FormData = {
@@ -30,7 +30,11 @@ const initialScheduleData: RowData[] = [
 ];
 
 const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
-    <h2 className="text-2xl font-bold text-center text-[#1a5276] mb-6">{title}</h2>
+    <div className="flex items-center gap-4 mb-8">
+        <div className="h-[2px] flex-grow bg-gray-100"></div>
+        <h2 className="text-xl font-black text-[#1a5276] uppercase tracking-tighter italic">{title}</h2>
+        <div className="h-[2px] flex-grow bg-gray-100"></div>
+    </div>
 );
 
 function PregnantRegisterPage() {
@@ -41,7 +45,7 @@ function PregnantRegisterPage() {
     const [currentCpf, setCurrentCpf] = useState('');
     const [lastRegistered, setLastRegistered] = useState<IGestante | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [showEditForm, setShowEditForm] = useState(false); // <-- NOVO STATE PARA O BOTÃO EDITAR
+    const [showEditForm, setShowEditForm] = useState(false);
 
     const onGestanteFound = (gestante: IGestante) => {
         const { id, cronograma, idade, ...restOfData } = gestante;
@@ -51,7 +55,7 @@ function PregnantRegisterPage() {
         setCurrentCpf(gestante.cpf);
         setMessage(null);
         setLastRegistered(null);
-        setShowEditForm(false); // Garante que começa fechado
+        setShowEditForm(false);
     };
 
     const handleClear = () => {
@@ -68,12 +72,11 @@ function PregnantRegisterPage() {
         setMessage(null);
         setIsLoading(true);
         try {
-            // AGORA SALVA OS DADOS PESSOAIS (...formData) E O CRONOGRAMA
             await api.put(`/api/gestantes/${currentCpf}`, { ...formData, cronograma: scheduleData });
-            setMessage({ type: 'success', text: 'Prontuário atualizado com sucesso!' });
-            setShowEditForm(false); // Fecha o form de edição depois de salvar
+            setMessage({ type: 'success', text: 'Prontuário médico atualizado!' });
+            setShowEditForm(false);
         } catch (error) {
-            setMessage({ type: 'error', text: 'Erro ao atualizar o prontuário.' });
+            setMessage({ type: 'error', text: 'Falha na atualização.' });
         } finally {
             setIsLoading(false);
         }
@@ -86,7 +89,7 @@ function PregnantRegisterPage() {
         setLastRegistered(null);
         try {
             const response = await api.post('/api/gestantes', { ...formData, cronograma: scheduleData });
-            setMessage({ type: 'success', text: 'Gestante cadastrada com sucesso!' });
+            setMessage({ type: 'success', text: 'Novo cadastro realizado!' });
             setLastRegistered(response.data);
             setFormData(initialFormState);
             setScheduleData(initialScheduleData);
@@ -100,85 +103,94 @@ function PregnantRegisterPage() {
     };
 
     const handleViewLastRegistered = () => {
-        if (lastRegistered) {
-            onGestanteFound(lastRegistered);
-        }
+        if (lastRegistered) onGestanteFound(lastRegistered);
     };
 
     return (
-        <div className="p-4 md:p-8 space-y-8">
-            <header className="text-center">
-                <h1 className="text-4xl font-bold text-[#1a5276]">Rede Cegonha</h1>
-                <p className="text-lg text-gray-600">Voando na Cidade de Suzano</p>
-            </header>
+        <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-12">
+            
+            {/* Componente de Busca (Banner e Input) */}
+            <SearchByCpf 
+                onGestanteFound={onGestanteFound} 
+                onClear={handleClear} 
+                gestanteEncontrada={isEditing ? { ...formData, id: 0, cronograma: scheduleData, idade: parseInt(formData.idade) || 0 } : null} 
+            />
 
-            <SearchByCpf onGestanteFound={onGestanteFound} onClear={handleClear} gestanteEncontrada={isEditing ? { ...formData, id: 0, cronograma: scheduleData, idade: parseInt(formData.idade) || 0 } : null} />
-
+            {/* Mensagem Suspensa */}
             {message && (
-                <div className={`p-4 text-center font-semibold rounded-md ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                <div className={`p-4 text-center font-bold rounded-xl shadow-lg border-2 animate-bounce ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
+                    <span className="mr-2">{message.type === 'success' ? '✅' : '❌'}</span>
                     {message.text}
                     {message.type === 'success' && lastRegistered && (
-                        <button onClick={handleViewLastRegistered} className="ml-4 font-bold underline hover:text-green-800">Visualizar Cadastro</button>
+                        <button onClick={handleViewLastRegistered} className="ml-4 px-3 py-1 bg-white rounded-lg shadow-sm hover:text-emerald-900 transition-all border border-emerald-200">Ver Prontuário</button>
                     )}
                 </div>
             )}
 
             {!isEditing ? (
-                <form onSubmit={handleSubmit}>
-                    <RegistrationForm formData={formData} setFormData={setFormData} />
-                    <PrenatalSchedule scheduleData={scheduleData} setScheduleData={setScheduleData} />
-                    <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+                        <SectionTitle title="Ficha de Cadastro" />
+                        <RegistrationForm formData={formData} setFormData={setFormData} />
+                    </div>
+                    
+                    <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+                        <SectionTitle title="Cronograma Inicial" />
+                        <PrenatalSchedule scheduleData={scheduleData} setScheduleData={setScheduleData} />
+                    </div>
 
+                    <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
                         <button 
                             type="submit" 
                             disabled={isLoading} 
-                            className="w-full sm:w-auto bg-[#1a5276] text-white font-bold text-base py-3 px-8 rounded hover:bg-[#0e3040] transition-colors disabled:bg-gray-400"
+                            className="w-full sm:w-auto bg-[#1a5276] text-white font-black py-4 px-12 rounded-2xl hover:bg-[#154360] transition-all shadow-xl active:scale-95 disabled:bg-gray-300"
                         >
-                            {isLoading ? 'Registrando...' : 'Registrar'}
+                            {isLoading ? 'PROCESSANDO...' : 'REGISTRAR GESTANTE'}
                         </button>
-                         <button 
+                        <button 
                             type="button" 
                             onClick={handleClear}
-                            className="w-full sm:w-auto bg-[#1a5276] text-white font-bold py-3 px-8 rounded hover:bg-gray-600 transition-colors"
+                            className="text-gray-400 font-bold hover:text-gray-600 transition-colors"
                         >
-                            Limpar
+                            Limpar Formulário
                         </button>
                     </div>
                 </form>
             ) : (
-                <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-                    <SectionTitle title={`Prontuário Médico Digital`} />
-
-                    {/* --- AQUI ENTRA O CARTÃO E O BOTÃO DE EDITAR --- */}
-                    {showEditForm ? (
-                        <div className="bg-white p-6 rounded-xl shadow-inner border-2 border-blue-200 mb-8 relative">
-                            <div className="flex justify-between items-center mb-4 border-b pb-2">
-                                <h3 className="text-lg font-bold text-[#1a5276]">Editando Dados Pessoais</h3>
-                                <button type="button" onClick={() => setShowEditForm(false)} className="text-gray-500 hover:text-red-500 font-bold px-3 py-1 bg-gray-100 rounded-md">
-                                    ✕ Cancelar Edição
-                                </button>
-                            </div>
-                            <RegistrationForm formData={formData} setFormData={setFormData} />
-                            <p className="text-xs text-center text-blue-600 mt-4 font-bold bg-blue-50 p-2 rounded">
-                                Role a página para baixo e clique em "Salvar Alterações" para confirmar.
-                            </p>
-                        </div>
-                    ) : (
-                        <PatientSummaryCard patient={formData} onEditClick={() => setShowEditForm(true)} />
-                    )}
-
-                    {/* Dashboard Recebendo a Data da Menstruação */}
-                    <Dashboard cpf={currentCpf} dum={formData.ultima_menstruacao} />
-
-                    <PrenatalSchedule scheduleData={scheduleData} setScheduleData={setScheduleData} />
+                <div className="space-y-10 animate-in fade-in zoom-in-95 duration-500">
                     
-                    <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
-                        <button onClick={handleUpdate} disabled={isLoading} className="order-2 sm:order-1 bg-[#1a5276] text-white py-2 px-6 rounded hover:bg-[#0e3040] transition-colors font-bold disabled:bg-gray-400">
-                            {isLoading ? 'Salvando...' : 'Salvar Alterações'}
-                        </button>
-                        <button type="button" onClick={handleClear} className="order-1 sm:order-2 bg-[#1a5276] text-white font-bold py-2 px-6 rounded hover:bg-gray-600 transition-colors">
-                            Fechar Prontuário
-                        </button>
+                    <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 relative">
+                        <SectionTitle title="Prontuário Digital" />
+
+                        {showEditForm ? (
+                            <div className="bg-blue-50/50 p-6 rounded-2xl border-2 border-blue-200 mb-8 animate-in fade-in duration-300">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-lg font-black text-[#1a5276]">Modo de Edição Ativo</h3>
+                                    <button type="button" onClick={() => setShowEditForm(false)} className="text-rose-500 font-bold px-4 py-2 bg-white rounded-xl shadow-sm hover:bg-rose-50 transition-all border border-rose-100">
+                                        Cancelar
+                                    </button>
+                                </div>
+                                <RegistrationForm formData={formData} setFormData={setFormData} />
+                            </div>
+                        ) : (
+                            <PatientSummaryCard patient={formData} onEditClick={() => setShowEditForm(true)} />
+                        )}
+
+                        <Dashboard cpf={currentCpf} dum={formData.ultima_menstruacao} />
+
+                        <div className="mt-12">
+                            <SectionTitle title="Calendário Pré-Natal" />
+                            <PrenatalSchedule scheduleData={scheduleData} setScheduleData={setScheduleData} />
+                        </div>
+                        
+                        <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-center gap-4">
+                            <button onClick={handleUpdate} disabled={isLoading} className="bg-[#1a5276] text-white py-4 px-10 rounded-2xl hover:bg-[#154360] transition-all font-black shadow-lg active:scale-95 disabled:bg-gray-300">
+                                {isLoading ? 'SALVANDO...' : 'CONFIRMAR ATUALIZAÇÕES'}
+                            </button>
+                            <button type="button" onClick={handleClear} className="bg-gray-100 text-gray-500 font-bold py-4 px-10 rounded-2xl hover:bg-gray-200 transition-all border border-gray-200">
+                                Fechar Prontuário
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
