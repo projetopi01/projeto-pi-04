@@ -4,8 +4,8 @@ import axios from 'axios';
 import SearchByCpf from '../components/SearchByCpf';
 import RegistrationForm from '../components/RegistrationForm';
 import PrenatalSchedule from '../components/PrenatalSchedule';
-// IMPORTANTE: Removi o WeeksCalculator daqui, pois o Dashboard já faz isso agora com o GestationalAgeCard!
 import Dashboard from '../components/Dashboard';
+import PatientSummaryCard from '../components/PatientSummaryCard'; // <-- IMPORTAMOS O CARD AQUI
 import type { IGestante, FormData, RowData } from '../types';
 
 export const initialFormState: FormData = {
@@ -41,6 +41,7 @@ function PregnantRegisterPage() {
     const [currentCpf, setCurrentCpf] = useState('');
     const [lastRegistered, setLastRegistered] = useState<IGestante | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false); // <-- NOVO STATE PARA O BOTÃO EDITAR
 
     const onGestanteFound = (gestante: IGestante) => {
         const { id, cronograma, idade, ...restOfData } = gestante;
@@ -50,6 +51,7 @@ function PregnantRegisterPage() {
         setCurrentCpf(gestante.cpf);
         setMessage(null);
         setLastRegistered(null);
+        setShowEditForm(false); // Garante que começa fechado
     };
 
     const handleClear = () => {
@@ -58,6 +60,7 @@ function PregnantRegisterPage() {
         setIsEditing(false);
         setCurrentCpf('');
         setMessage(null);
+        setShowEditForm(false);
         window.scroll({ top: 0, behavior: 'smooth' });
     };
 
@@ -65,10 +68,12 @@ function PregnantRegisterPage() {
         setMessage(null);
         setIsLoading(true);
         try {
-            await api.put(`/api/gestantes/${currentCpf}`, { cronograma: scheduleData });
-            setMessage({ type: 'success', text: 'Alterações registradas com sucesso!' });
+            // AGORA SALVA OS DADOS PESSOAIS (...formData) E O CRONOGRAMA
+            await api.put(`/api/gestantes/${currentCpf}`, { ...formData, cronograma: scheduleData });
+            setMessage({ type: 'success', text: 'Prontuário atualizado com sucesso!' });
+            setShowEditForm(false); // Fecha o form de edição depois de salvar
         } catch (error) {
-            setMessage({ type: 'error', text: 'Erro ao atualizar o cronograma.' });
+            setMessage({ type: 'error', text: 'Erro ao atualizar o prontuário.' });
         } finally {
             setIsLoading(false);
         }
@@ -142,19 +147,37 @@ function PregnantRegisterPage() {
                 </form>
             ) : (
                 <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-                    <SectionTitle title={`Editando Cronograma de ${formData.nome}`} />
+                    <SectionTitle title={`Prontuário Médico Digital`} />
 
-                    {/* --- AQUI ESTÁ A MÁGICA --- */}
-                    {/* Agora o Dashboard recebe a data da última menstruação para calcular a barra! */}
+                    {/* --- AQUI ENTRA O CARTÃO E O BOTÃO DE EDITAR --- */}
+                    {showEditForm ? (
+                        <div className="bg-white p-6 rounded-xl shadow-inner border-2 border-blue-200 mb-8 relative">
+                            <div className="flex justify-between items-center mb-4 border-b pb-2">
+                                <h3 className="text-lg font-bold text-[#1a5276]">Editando Dados Pessoais</h3>
+                                <button type="button" onClick={() => setShowEditForm(false)} className="text-gray-500 hover:text-red-500 font-bold px-3 py-1 bg-gray-100 rounded-md">
+                                    ✕ Cancelar Edição
+                                </button>
+                            </div>
+                            <RegistrationForm formData={formData} setFormData={setFormData} />
+                            <p className="text-xs text-center text-blue-600 mt-4 font-bold bg-blue-50 p-2 rounded">
+                                Role a página para baixo e clique em "Salvar Alterações" para confirmar.
+                            </p>
+                        </div>
+                    ) : (
+                        <PatientSummaryCard patient={formData} onEditClick={() => setShowEditForm(true)} />
+                    )}
+
+                    {/* Dashboard Recebendo a Data da Menstruação */}
                     <Dashboard cpf={currentCpf} dum={formData.ultima_menstruacao} />
 
                     <PrenatalSchedule scheduleData={scheduleData} setScheduleData={setScheduleData} />
+                    
                     <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
                         <button onClick={handleUpdate} disabled={isLoading} className="order-2 sm:order-1 bg-[#1a5276] text-white py-2 px-6 rounded hover:bg-[#0e3040] transition-colors font-bold disabled:bg-gray-400">
                             {isLoading ? 'Salvando...' : 'Salvar Alterações'}
                         </button>
                         <button type="button" onClick={handleClear} className="order-1 sm:order-2 bg-[#1a5276] text-white font-bold py-2 px-6 rounded hover:bg-gray-600 transition-colors">
-                            Voltar
+                            Fechar Prontuário
                         </button>
                     </div>
                 </div>
