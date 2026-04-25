@@ -13,7 +13,7 @@ export const initialFormState: FormData = {
     endereco: '', cep: '', cidade: '', estado: '', telefone: ''
 };
 
-// REDUÇÃO E AGRUPAMENTO DAS SEMANAS (Protocolo Otimizado Suzano)
+// NOVO PADRÃO: 6 LINHAS ESTRATÉGICAS
 const initialScheduleData: RowData[] = [
     { week: '1º Trimestre (Até 12 sem)', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
     { week: '2º Trimestre (13 a 27 sem)', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
@@ -45,15 +45,13 @@ function PregnantRegisterPage() {
         const { id, cronograma, idade, ...restOfData } = gestante;
         setFormData({ ...restOfData, idade: idade.toString() });
         
-        // --- LÓGICA DE PROTEÇÃO DO NOVO FORMATO ---
-        // Se o cronograma do banco não tiver exatamente 6 linhas, ignoramos e usamos o padrão novo
+        // --- PROTEÇÃO CONTRA FORMATO ANTIGO ---
         if (cronograma && cronograma.length === initialScheduleData.length) {
             setScheduleData(cronograma);
         } else {
             setScheduleData(initialScheduleData);
-            console.warn("Cronograma antigo convertido para o novo padrão de 6 linhas.");
         }
-        // ------------------------------------------
+        // --------------------------------------
 
         setIsEditing(true);
         setCurrentCpf(gestante.cpf);
@@ -113,6 +111,7 @@ function PregnantRegisterPage() {
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-12">
             
+            {/* O SearchByCpf já contém o Header Moderno, eliminando o texto fantasma */}
             <SearchByCpf 
                 onGestanteFound={onGestanteFound} 
                 onClear={handleClear} 
