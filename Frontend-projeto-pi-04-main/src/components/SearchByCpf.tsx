@@ -64,30 +64,33 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
         <div className="max-w-4xl mx-auto px-4">
             {/* Banner Principal com Coração Restaurado */}
             <div className="bg-gradient-to-br from-[#1a5276] via-[#154360] to-[#0e2a3b] p-10 rounded-3xl shadow-2xl mb-10 text-white relative overflow-hidden border-b-4 border-blue-400">
-                
-                {/* O CORAÇÃO (ÍCONE DE FUNDO) */}
-                <div className="absolute right-[-20px] top-[-20px] opacity-10 rotate-12 pointer-events-none z-0">
-                    <svg width="220" height="220" viewBox="0 0 24 24" fill="white">
-                        <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" />
-                    </svg>
-                </div>
+    
+    {/* Ícone de Coração (Marca d'água) */}
+    <div className="absolute right-[-20px] top-[-20px] opacity-10 rotate-12 pointer-events-none z-0">
+        <svg width="220" height="220" viewBox="0 0 24 24" fill="white">
+            <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" />
+        </svg>
+    </div>
 
-                <div className="relative z-10">
-                    <div className="inline-flex items-center gap-2 bg-blue-500/20 backdrop-blur-md border border-blue-400/30 px-3 py-1 rounded-full mb-6">
-                        <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">
-                            Sistema Municipal • Suzano
-                        </span>
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-black mb-3 tracking-tighter text-white">
-                        REDE <span className="text-blue-400">CEGONHA</span>
-                    </h1>
-                    <p className="text-lg text-blue-100 font-medium max-w-xl leading-relaxed">
-                        Gestão de prontuários e monitoramento de sinais específicos <span className="text-white font-bold">em tempo real.</span>
-                    </p>
-                </div>
-            </div>
-
+    <div className="relative z-10">
+        <div className="inline-flex items-center gap-2 bg-blue-500/20 backdrop-blur-md border border-blue-400/30 px-3 py-1 rounded-full mb-6">
+            <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">
+                Sistema Municipal • Suzano
+            </span>
+        </div>
+        
+        <h1 className="text-4xl md:text-5xl font-black mb-3 tracking-tighter text-white">
+            REDE <span className="text-blue-400">CEGONHA</span>
+        </h1>
+        
+        {/* Fonte reduzida para text-base para caber na mesma linha */}
+        <p className="text-base text-blue-100 font-medium max-w-2xl leading-relaxed">
+            Gestão de prontuários e monitoramento de sinais específicos <span className="text-white font-bold">em tempo real.</span>
+        </p>
+    </div>
+</div>
+            
             {/* Seção de Busca */}
             <section className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                 <SectionTitle title="Acessar Cadastro" />
