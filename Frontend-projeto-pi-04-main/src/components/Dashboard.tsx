@@ -87,7 +87,7 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
         <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5">
           <h2 className="text-xl font-black text-[#1a5276] flex items-center gap-3 uppercase tracking-tighter">
             <span className="flex h-3 w-3 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.7)]"></span>
-            Telemetria de Sinais Vitais (IoT)
+            Telemetria de Sinais Vitais 
           </h2>
           <span className="text-[10px] font-black text-gray-400 border-2 border-gray-100 px-4 py-1.5 rounded-full uppercase tracking-widest bg-gray-50">
             Live Stream
