@@ -13,20 +13,14 @@ export const initialFormState: FormData = {
     endereco: '', cep: '', cidade: '', estado: '', telefone: ''
 };
 
+// REDUÇÃO E AGRUPAMENTO DAS SEMANAS (Protocolo Otimizado Suzano)
 const initialScheduleData: RowData[] = [
-    { week: 'Até 6 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: 'Até 28 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: 'De 29 a 35 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: 'Após 36 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: 'A cada Trimestre', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: '11 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: '12 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: '20 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: '24 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: '25 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: '28 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: '32 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
-    { week: '35 semanas', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
+    { week: '1º Trimestre (Até 12 sem)', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
+    { week: '2º Trimestre (13 a 27 sem)', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
+    { week: '3º Trimestre (28 a 35 sem)', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
+    { week: 'Reta Final (Após 36 sem)', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
+    { week: 'Exames de Rotina (Trimestral)', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
+    { week: 'Vacinação e Odonto', cells: Array(10).fill(null).map(() => ({ text: '', status: 'upcoming' })) },
 ];
 
 const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
@@ -176,7 +170,7 @@ function PregnantRegisterPage() {
                         <Dashboard cpf={currentCpf} dum={formData.ultima_menstruacao} />
 
                         <div className="mt-12">
-                            <SectionTitle title="Calendário Pré-Natal" />
+                            <SectionTitle title="Calendário Pré-Natal Municipal" />
                             <PrenatalSchedule scheduleData={scheduleData} setScheduleData={setScheduleData} />
                         </div>
                         
