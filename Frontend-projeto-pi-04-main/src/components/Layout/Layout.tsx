@@ -18,16 +18,24 @@ const Header = () => {
   return (
     <header className="bg-white border-b border-gray-100 shadow-sm">
       <nav className="container mx-auto px-6 py-5 flex justify-between items-center">
-        {/* LOGO E TÍTULO PERSONALIZADO */}
+        {/* LOGO E TÍTULO PERSONALIZADO - REDE ALYNE */}
         <div className="flex items-center gap-3">
-          <div className="bg-[#1a5276] p-2 rounded-lg hidden sm:block">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-              <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" />
+          <div className="bg-[#1a5276] p-2.5 rounded-xl hidden sm:block shadow-md">
+            {/* NOVO LOGOTIPO (O "Y" com a Rede e o Bebê) */}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+               {/* Tronco do Y */}
+               <path d="M12 14v8" />
+               {/* Hastes do Y */}
+               <path d="M6 4l6 10l6-10" />
+               {/* Rede de descanso (Hammock) pendurada nas hastes */}
+               <path d="M5 5c0 8 14 8 14 0" fill="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+               {/* Bebê (Círculo) na rede */}
+               <circle cx="12" cy="8.5" r="2" fill="white" stroke="none" />
             </svg>
           </div>
           <div>
             <div className="text-xl font-black text-[#1a5276] leading-none uppercase tracking-tighter">
-              Rede <span className="text-blue-500">Cegonha</span>
+              Rede <span className="text-blue-500">Alyne</span>
             </div>
             <div className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
               Unidade • Suzano/SP
@@ -57,7 +65,7 @@ const Footer = () => (
   <footer className="bg-white border-t border-gray-100 py-8 mt-auto">
     <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
       <div className="text-gray-400 text-xs font-medium">
-        &copy; 2026 <span className="font-bold text-gray-500">Rede Cegonha Digital</span>. Todos os direitos reservados.
+        &copy; 2026 <span className="font-bold text-gray-500">Rede Alyne Digital</span>. Todos os direitos reservados.
       </div>
       <div className="flex items-center gap-2">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
