@@ -46,7 +46,7 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
             setError('CPF inválido. Por favor, digite 11 números.');
             return;
         }
-        setLoading(true);
+        loading(true);
         setError('');
         try {
             const response = await api.get<IGestante>(`/api/gestantes/${cpfApenasNumeros}`);
@@ -62,13 +62,16 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
 
     return (
         <div className="max-w-4xl mx-auto px-4">
-            {/* Banner Principal com Coração Restaurado */}
+            {/* Banner Principal REDE ALYNE */}
             <div className="bg-gradient-to-br from-[#1a5276] via-[#154360] to-[#0e2a3b] p-10 rounded-3xl shadow-2xl mb-10 text-white relative overflow-hidden border-b-4 border-blue-400">
     
-    {/* Ícone de Coração (Marca d'água) */}
+    {/* Ícone NOVO LOGOTIPO (Marca d'água) */}
     <div className="absolute right-[-20px] top-[-20px] opacity-10 rotate-12 pointer-events-none z-0">
-        <svg width="220" height="220" viewBox="0 0 24 24" fill="white">
-            <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" />
+        <svg width="220" height="220" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 14v8" />
+            <path d="M6 4l6 10l6-10" />
+            <path d="M5 5c0 8 14 8 14 0" fill="rgba(255,255,255,0.2)" strokeWidth="1" />
+            <circle cx="12" cy="8.5" r="2.5" fill="white" stroke="none" />
         </svg>
     </div>
 
@@ -81,10 +84,9 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
         </div>
         
         <h1 className="text-4xl md:text-5xl font-black mb-3 tracking-tighter text-white">
-            REDE <span className="text-blue-400">CEGONHA</span>
+            REDE <span className="text-blue-400">ALYNE</span>
         </h1>
         
-        {/* Fonte reduzida para text-base para caber na mesma linha */}
         <p className="text-base text-blue-100 font-medium max-w-2xl leading-relaxed">
             Gestão de prontuários e monitoramento de sinais específicos <span className="text-white font-bold">em tempo real.</span>
         </p>
