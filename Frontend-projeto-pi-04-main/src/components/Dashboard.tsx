@@ -6,7 +6,6 @@ import {
 import RiskIndicator from './RiskIndicator';
 import GestationalAgeCard from './GestationalAgeCard';
 
-// Fonte moderna para o gráfico (Recharts)
 const GRAPH_FONT = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
 interface SinaisVitaisData {
@@ -53,7 +52,6 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
 
   const ultimaLeitura = dados.length > 0 ? dados[dados.length - 1] : null;
 
-  // Lógica de cores dos Cards baseada no Manual de Ferraz / Protocolos Médicos
   const getBpmStatus = (bpm: number) => {
     if (bpm >= 110 || bpm <= 60) return { label: 'CRÍTICO', bg: 'bg-red-600', border: 'border-red-800', text: 'text-white', pulse: 'animate-pulse shadow-lg shadow-red-200' };
     if (bpm >= 100) return { label: 'ATENÇÃO', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600', pulse: '' };
@@ -87,7 +85,7 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
         <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5">
           <h2 className="text-xl font-black text-[#1a5276] flex items-center gap-3 uppercase tracking-tighter">
             <span className="flex h-3 w-3 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.7)]"></span>
-            Telemetria de Sinais Vitais 
+            Telemetria de Sinais Vitais (IoT)
           </h2>
           <span className="text-[10px] font-black text-gray-400 border-2 border-gray-100 px-4 py-1.5 rounded-full uppercase tracking-widest bg-gray-50">
             Live Stream
@@ -98,7 +96,6 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
               
-              {/* Card 1: Frequência Cardíaca */}
               {(() => {
                 const status = getBpmStatus(ultimaLeitura.batimentos);
                 return (
@@ -113,7 +110,6 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                 );
               })()}
 
-              {/* Card 2: P. Sistólica */}
               {(() => {
                 const status = getSistolicaStatus(ultimaLeitura.pressao_sistolica);
                 return (
@@ -128,7 +124,6 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                 );
               })()}
 
-              {/* Card 3: P. Diastólica */}
               {(() => {
                 const status = getDiastolicaStatus(ultimaLeitura.pressao_diastolica);
                 return (
@@ -143,7 +138,6 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                 );
               })()}
 
-              {/* Card 4: Saturação O₂ (Oxigênio) */}
               {(() => {
                 const status = getO2Status(ultimaLeitura.oxigenacao);
                 return (
@@ -160,14 +154,10 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
 
             </div>
 
-            {/* --- ÁREA DO GRÁFICO REFINADA --- */}
             <div className="h-[320px] w-full bg-white rounded-2xl p-5 border-2 border-gray-100 shadow-inner">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={dados} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-                  
-                  {/* GRADE DO FUNDO (TRAÇOS) */}
                   <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#E5E7EB" />
-                  
                   <XAxis 
                     dataKey="horaCurta" 
                     axisLine={false} 
@@ -183,14 +173,12 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                     domain={[40, 180]} 
                   />
                   <YAxis yAxisId="right" orientation="right" domain={[80, 100]} hide />
-                  
                   <Tooltip 
                     contentStyle={{ borderRadius: '16px', border: '2px solid #E5E7EB', boxShadow: '0 15px 30px -5px rgba(0,0,0,0.15)', fontFamily: GRAPH_FONT, padding: '12px' }}
                     itemStyle={{ fontSize: '13px', fontWeight: 800, padding: '2px 0' }}
                     labelStyle={{ fontSize: '11px', color: '#6B7280', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}
                     cursor={{ stroke: '#4B5563', strokeWidth: 1.5, strokeDasharray: '4 4' }}
                   />
-                  
                   <Legend 
                     iconType="circle" 
                     iconSize={8}
@@ -200,26 +188,24 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                     wrapperStyle={{ fontSize: '11px', fontFamily: GRAPH_FONT, textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 800, color: '#333', paddingBottom: '20px' }} 
                   />
                   
-                  {/* Área de Oxigênio (Azul ultra suave, sem bordas fortes) */}
                   <Area 
                     yAxisId="right" 
                     type="monotone" 
                     dataKey="oxigenacao" 
                     name="Saturação O₂"
-                    fill="#EFF6FF" // Azul pastel bem clarinho (blue-50)
-                    fillOpacity={0.5} // Mantive a transparência sutil
-                    stroke="none" // REMOVI A BORDA FORTE QUE ESTAVA FEIA
+                    fill="#EFF6FF" 
+                    fillOpacity={0.5} 
+                    stroke="none" 
                     isAnimationActive={false} 
                   />
                   
-                  {/* Linhas Principais REFINADAS (Espessura = 1.5) */}
                   <Line 
                     yAxisId="left" 
                     type="monotone" 
                     dataKey="batimentos" 
                     name="Frequência Cardíaca" 
                     stroke="#EF4444" 
-                    strokeWidth={1.5} // LINHA FINA E REFINADA
+                    strokeWidth={1.5} 
                     dot={{ r: 2, fill: '#EF4444', strokeWidth: 0 }} 
                     activeDot={{ r: 5, stroke: 'white', strokeWidth: 2 }}
                     isAnimationActive={false} 
@@ -230,8 +216,8 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                     dataKey="pressao_sistolica" 
                     name="P. Sistólica" 
                     stroke="#F59E0B" 
-                    strokeWidth={1.5} // LINHA FINA E REFINADA
-                    strokeDasharray="5 5" // Traçado discreto
+                    strokeWidth={1.5} 
+                    strokeDasharray="5 5" 
                     dot={false} 
                     isAnimationActive={false} 
                   />
@@ -241,8 +227,8 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
                     dataKey="pressao_diastolica" 
                     name="P. Diastólica" 
                     stroke="#8B5CF6" 
-                    strokeWidth={1.5} // LINHA FINA E REFINADA
-                    strokeDasharray="5 5" // Traçado discreto
+                    strokeWidth={1.5} 
+                    strokeDasharray="5 5" 
                     dot={false} 
                     isAnimationActive={false} 
                   />
