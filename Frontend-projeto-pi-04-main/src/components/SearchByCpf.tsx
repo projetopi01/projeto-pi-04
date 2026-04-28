@@ -46,8 +46,11 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
             setError('CPF inválido. Por favor, digite 11 números.');
             return;
         }
-        loading(true);
+        
+        // CORREÇÃO AQUI: setLoading em vez de loading
+        setLoading(true); 
         setError('');
+        
         try {
             const response = await api.get<IGestante>(`/api/gestantes/${cpfApenasNumeros}`);
             onGestanteFound(response.data);
@@ -65,33 +68,33 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
             {/* Banner Principal REDE ALYNE */}
             <div className="bg-gradient-to-br from-[#1a5276] via-[#154360] to-[#0e2a3b] p-10 rounded-3xl shadow-2xl mb-10 text-white relative overflow-hidden border-b-4 border-blue-400">
     
-    {/* Ícone NOVO LOGOTIPO (Marca d'água) */}
-    <div className="absolute right-[-20px] top-[-20px] opacity-10 rotate-12 pointer-events-none z-0">
-        <svg width="220" height="220" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 14v8" />
-            <path d="M6 4l6 10l6-10" />
-            <path d="M5 5c0 8 14 8 14 0" fill="rgba(255,255,255,0.2)" strokeWidth="1" />
-            <circle cx="12" cy="8.5" r="2.5" fill="white" stroke="none" />
-        </svg>
-    </div>
+                {/* Ícone NOVO LOGOTIPO (Marca d'água) */}
+                <div className="absolute right-[-20px] top-[-20px] opacity-10 rotate-12 pointer-events-none z-0">
+                    <svg width="220" height="220" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 14v8" />
+                        <path d="M6 4l6 10l6-10" />
+                        <path d="M5 5c0 8 14 8 14 0" fill="rgba(255,255,255,0.2)" strokeWidth="1" />
+                        <circle cx="12" cy="8.5" r="2.5" fill="white" stroke="none" />
+                    </svg>
+                </div>
 
-    <div className="relative z-10">
-        <div className="inline-flex items-center gap-2 bg-blue-500/20 backdrop-blur-md border border-blue-400/30 px-3 py-1 rounded-full mb-6">
-            <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">
-                Sistema Municipal • Suzano
-            </span>
-        </div>
-        
-        <h1 className="text-4xl md:text-5xl font-black mb-3 tracking-tighter text-white">
-            REDE <span className="text-blue-400">ALYNE</span>
-        </h1>
-        
-        <p className="text-base text-blue-100 font-medium max-w-2xl leading-relaxed">
-            Gestão de prontuários e monitoramento de sinais específicos <span className="text-white font-bold">em tempo real.</span>
-        </p>
-    </div>
-</div>
+                <div className="relative z-10">
+                    <div className="inline-flex items-center gap-2 bg-blue-500/20 backdrop-blur-md border border-blue-400/30 px-3 py-1 rounded-full mb-6">
+                        <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">
+                            Sistema Municipal • Suzano
+                        </span>
+                    </div>
+                    
+                    <h1 className="text-4xl md:text-5xl font-black mb-3 tracking-tighter text-white">
+                        REDE <span className="text-blue-400">ALYNE</span>
+                    </h1>
+                    
+                    <p className="text-base text-blue-100 font-medium max-w-2xl leading-relaxed">
+                        Gestão de prontuários e monitoramento de sinais específicos <span className="text-white font-bold">em tempo real.</span>
+                    </p>
+                </div>
+            </div>
             
             {/* Seção de Busca */}
             <section className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
