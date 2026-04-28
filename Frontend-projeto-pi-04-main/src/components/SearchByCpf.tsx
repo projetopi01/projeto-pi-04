@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import type { IGestante } from '../types';
 import api from '../services/api';
 
-// IMPORTANDO A IMAGEM COM FUNDO PRETO QUE VOCÊ SALVOU
-import logoAlyne from '../assets/logo-alyne-watermark.jpg';
+// IMPORTAÇÃO CORRIGIDA COM O NOME EXATO DO GITHUB
+import logoAlyne from '../assets/logo-alyne-watermark.jpg.png';
 
 const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
   <h2 className="text-xl font-black text-[#1a5276] mb-4 flex items-center gap-2">
@@ -70,7 +70,7 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
             {/* Banner Principal REDE ALYNE */}
             <div className="bg-gradient-to-br from-[#1a5276] via-[#154360] to-[#0e2a3b] p-10 rounded-3xl shadow-2xl mb-10 text-white relative overflow-hidden border-b-4 border-blue-400">
     
-                {/* MARCA D'ÁGUA COM MIX-BLEND-SCREEN (Some com o fundo preto) */}
+                {/* MARCA D'ÁGUA COM MIX-BLEND-SCREEN E TAMANHO AJUSTADO */}
                 <div className="absolute right-[-40px] top-[-40px] rotate-12 pointer-events-none z-0">
                     <img 
                         src={logoAlyne} 
