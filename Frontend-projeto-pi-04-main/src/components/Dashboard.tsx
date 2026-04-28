@@ -48,7 +48,7 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
     return () => clearInterval(intervalId);
   }, [cpf]); 
 
-  if (loading) return <div className="text-center p-10 font-bold text-gray-500 animate-pulse translate-no">A carregar monitoramento hemodinâmico...</div>;
+  if (loading) return <div className="text-center p-10 font-bold text-gray-500 animate-pulse">A carregar monitoramento hemodinâmico...</div>;
 
   const ultimaLeitura = dados.length > 0 ? dados[dados.length - 1] : null;
 
@@ -95,143 +95,61 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
         {dados.length > 0 && ultimaLeitura ? (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-              
-              {(() => {
-                const status = getBpmStatus(ultimaLeitura.batimentos);
-                return (
-                  <div className={`p-5 rounded-2xl border-2 transition-all duration-700 ${status.bg} ${status.border} ${status.text} ${status.pulse}`}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">Frequência Cardíaca</p>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-4xl font-black tracking-tighter">{Math.round(ultimaLeitura.batimentos)}</span>
-                      <span className="text-xs font-bold opacity-80 uppercase">BPM</span>
-                    </div>
-                    <p className="text-[9px] font-black mt-2 tracking-widest uppercase bg-black/10 px-2 py-0.5 rounded inline-block">{status.label}</p>
-                  </div>
-                );
-              })()}
+              {/* Card 1: Frequência Cardíaca */}
+              <div className={`p-5 rounded-2xl border-2 transition-all duration-700 ${getBpmStatus(ultimaLeitura.batimentos).bg} ${getBpmStatus(ultimaLeitura.batimentos).border} ${getBpmStatus(ultimaLeitura.batimentos).text} ${getBpmStatus(ultimaLeitura.batimentos).pulse}`}>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">Frequência Cardíaca</p>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-4xl font-black tracking-tighter">{Math.round(ultimaLeitura.batimentos)}</span>
+                  <span className="text-xs font-bold opacity-80 uppercase">BPM</span>
+                </div>
+                <p className="text-[9px] font-black mt-2 tracking-widest uppercase bg-black/10 px-2 py-0.5 rounded inline-block">{getBpmStatus(ultimaLeitura.batimentos).label}</p>
+              </div>
 
-              {(() => {
-                const status = getSistolicaStatus(ultimaLeitura.pressao_sistolica);
-                return (
-                  <div className={`p-5 rounded-2xl border-2 transition-all duration-700 ${status.bg} ${status.border} ${status.text} ${status.pulse}`}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">P. Sistólica</p>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-4xl font-black tracking-tighter">{ultimaLeitura.pressao_sistolica}</span>
-                      <span className="text-xs font-bold opacity-80 uppercase">mmHg</span>
-                    </div>
-                    <p className="text-[9px] font-black mt-2 tracking-widest uppercase bg-black/10 px-2 py-0.5 rounded inline-block">{status.label}</p>
-                  </div>
-                );
-              })()}
+              {/* Card 2: Sistólica */}
+              <div className={`p-5 rounded-2xl border-2 transition-all duration-700 ${getSistolicaStatus(ultimaLeitura.pressao_sistolica).bg} ${getSistolicaStatus(ultimaLeitura.pressao_sistolica).border} ${getSistolicaStatus(ultimaLeitura.pressao_sistolica).text} ${getSistolicaStatus(ultimaLeitura.pressao_sistolica).pulse}`}>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">P. Sistólica</p>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-4xl font-black tracking-tighter">{ultimaLeitura.pressao_sistolica}</span>
+                  <span className="text-xs font-bold opacity-80 uppercase">mmHg</span>
+                </div>
+                <p className="text-[9px] font-black mt-2 tracking-widest uppercase bg-black/10 px-2 py-0.5 rounded inline-block">{getSistolicaStatus(ultimaLeitura.pressao_sistolica).label}</p>
+              </div>
 
-              {(() => {
-                const status = getDiastolicaStatus(ultimaLeitura.pressao_diastolica);
-                return (
-                  <div className={`p-5 rounded-2xl border-2 transition-all duration-700 ${status.bg} ${status.border} ${status.text} ${status.pulse}`}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">P. Diastólica</p>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-4xl font-black tracking-tighter">{ultimaLeitura.pressao_diastolica}</span>
-                      <span className="text-xs font-bold opacity-80 uppercase">mmHg</span>
-                    </div>
-                    <p className="text-[9px] font-black mt-2 tracking-widest uppercase bg-black/10 px-2 py-0.5 rounded inline-block">{status.label}</p>
-                  </div>
-                );
-              })()}
+              {/* Card 3: Diastólica */}
+              <div className={`p-5 rounded-2xl border-2 transition-all duration-700 ${getDiastolicaStatus(ultimaLeitura.pressao_diastolica).bg} ${getDiastolicaStatus(ultimaLeitura.pressao_diastolica).border} ${getDiastolicaStatus(ultimaLeitura.pressao_diastolica).text} ${getDiastolicaStatus(ultimaLeitura.pressao_diastolica).pulse}`}>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">P. Diastólica</p>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-4xl font-black tracking-tighter">{ultimaLeitura.pressao_diastolica}</span>
+                  <span className="text-xs font-bold opacity-80 uppercase">mmHg</span>
+                </div>
+                <p className="text-[9px] font-black mt-2 tracking-widest uppercase bg-black/10 px-2 py-0.5 rounded inline-block">{getDiastolicaStatus(ultimaLeitura.pressao_diastolica).label}</p>
+              </div>
 
-              {(() => {
-                const status = getO2Status(ultimaLeitura.oxigenacao);
-                return (
-                  <div className={`p-5 rounded-2xl border-2 transition-all duration-700 ${status.bg} ${status.border} ${status.text} ${status.pulse}`}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">Saturação O₂</p>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-4xl font-black tracking-tighter">{Math.round(ultimaLeitura.oxigenacao)}</span>
-                      <span className="text-xs font-bold opacity-80 uppercase">%</span>
-                    </div>
-                    <p className="text-[9px] font-black mt-2 tracking-widest uppercase bg-black/10 px-2 py-0.5 rounded inline-block">{status.label}</p>
-                  </div>
-                );
-              })()}
-
+              {/* Card 4: Oxigenação */}
+              <div className={`p-5 rounded-2xl border-2 transition-all duration-700 ${getO2Status(ultimaLeitura.oxigenacao).bg} ${getO2Status(ultimaLeitura.oxigenacao).border} ${getO2Status(ultimaLeitura.oxigenacao).text} ${getO2Status(ultimaLeitura.oxigenacao).pulse}`}>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">Saturação O₂</p>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-4xl font-black tracking-tighter">{Math.round(ultimaLeitura.oxigenacao)}</span>
+                  <span className="text-xs font-bold opacity-80 uppercase">%</span>
+                </div>
+                <p className="text-[9px] font-black mt-2 tracking-widest uppercase bg-black/10 px-2 py-0.5 rounded inline-block">{getO2Status(ultimaLeitura.oxigenacao).label}</p>
+              </div>
             </div>
 
             <div className="h-[320px] w-full bg-white rounded-2xl p-5 border-2 border-gray-100 shadow-inner">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={dados} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#E5E7EB" />
-                  <XAxis 
-                    dataKey="horaCurta" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{fontSize: 11, fill: '#6B7280', fontFamily: GRAPH_FONT, fontWeight: 500}} 
-                    minTickGap={60} 
-                  />
-                  <YAxis 
-                    yAxisId="left" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{fontSize: 11, fill: '#6B7280', fontFamily: GRAPH_FONT, fontWeight: 500}} 
-                    domain={[40, 180]} 
-                  />
+                  <XAxis dataKey="horaCurta" axisLine={false} tickLine={false} tick={{fontSize: 11, fill: '#6B7280', fontFamily: GRAPH_FONT, fontWeight: 500}} minTickGap={60} />
+                  <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{fontSize: 11, fill: '#6B7280', fontFamily: GRAPH_FONT, fontWeight: 500}} domain={[40, 180]} />
                   <YAxis yAxisId="right" orientation="right" domain={[80, 100]} hide />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: '2px solid #E5E7EB', boxShadow: '0 15px 30px -5px rgba(0,0,0,0.15)', fontFamily: GRAPH_FONT, padding: '12px' }}
-                    itemStyle={{ fontSize: '13px', fontWeight: 800, padding: '2px 0' }}
-                    labelStyle={{ fontSize: '11px', color: '#6B7280', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}
-                    cursor={{ stroke: '#4B5563', strokeWidth: 1.5, strokeDasharray: '4 4' }}
-                  />
-                  <Legend 
-                    iconType="circle" 
-                    iconSize={8}
-                    verticalAlign="top" 
-                    align="right" 
-                    height={50} 
-                    wrapperStyle={{ fontSize: '11px', fontFamily: GRAPH_FONT, textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 800, color: '#333', paddingBottom: '20px' }} 
-                  />
+                  <Tooltip contentStyle={{ borderRadius: '16px', border: '2px solid #E5E7EB', boxShadow: '0 15px 30px -5px rgba(0,0,0,0.15)', fontFamily: GRAPH_FONT, padding: '12px' }} itemStyle={{ fontSize: '13px', fontWeight: 800, padding: '2px 0' }} labelStyle={{ fontSize: '11px', color: '#6B7280', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }} cursor={{ stroke: '#4B5563', strokeWidth: 1.5, strokeDasharray: '4 4' }} />
+                  <Legend iconType="circle" iconSize={8} verticalAlign="top" align="right" height={50} wrapperStyle={{ fontSize: '11px', fontFamily: GRAPH_FONT, textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 800, color: '#333', paddingBottom: '20px' }} />
                   
-                  <Area 
-                    yAxisId="right" 
-                    type="monotone" 
-                    dataKey="oxigenacao" 
-                    name="Saturação O₂"
-                    fill="#EFF6FF" 
-                    fillOpacity={0.5} 
-                    stroke="none" 
-                    isAnimationActive={false} 
-                  />
-                  
-                  <Line 
-                    yAxisId="left" 
-                    type="monotone" 
-                    dataKey="batimentos" 
-                    name="Frequência Cardíaca" 
-                    stroke="#EF4444" 
-                    strokeWidth={1.5} 
-                    dot={{ r: 2, fill: '#EF4444', strokeWidth: 0 }} 
-                    activeDot={{ r: 5, stroke: 'white', strokeWidth: 2 }}
-                    isAnimationActive={false} 
-                  />
-                  <Line 
-                    yAxisId="left" 
-                    type="monotone" 
-                    dataKey="pressao_sistolica" 
-                    name="P. Sistólica" 
-                    stroke="#F59E0B" 
-                    strokeWidth={1.5} 
-                    strokeDasharray="5 5" 
-                    dot={false} 
-                    isAnimationActive={false} 
-                  />
-                  <Line 
-                    yAxisId="left" 
-                    type="monotone" 
-                    dataKey="pressao_diastolica" 
-                    name="P. Diastólica" 
-                    stroke="#8B5CF6" 
-                    strokeWidth={1.5} 
-                    strokeDasharray="5 5" 
-                    dot={false} 
-                    isAnimationActive={false} 
-                  />
+                  <Area yAxisId="right" type="monotone" dataKey="oxigenacao" name="Saturação O₂" fill="#EFF6FF" fillOpacity={0.5} stroke="none" isAnimationActive={false} />
+                  <Line yAxisId="left" type="monotone" dataKey="batimentos" name="Frequência Cardíaca" stroke="#EF4444" strokeWidth={1.5} dot={{ r: 2, fill: '#EF4444', strokeWidth: 0 }} activeDot={{ r: 5, stroke: 'white', strokeWidth: 2 }} isAnimationActive={false} />
+                  <Line yAxisId="left" type="monotone" dataKey="pressao_sistolica" name="P. Sistólica" stroke="#F59E0B" strokeWidth={1.5} strokeDasharray="5 5" dot={false} isAnimationActive={false} />
+                  <Line yAxisId="left" type="monotone" dataKey="pressao_diastolica" name="P. Diastólica" stroke="#8B5CF6" strokeWidth={1.5} strokeDasharray="5 5" dot={false} isAnimationActive={false} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -242,7 +160,7 @@ const Dashboard: React.FC<DashboardProps> = ({ cpf, dum }) => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-5 w-5 bg-cyan-500"></span>
             </span>
-            <p className="text-gray-400 font-black uppercase tracking-widest text-xs translate-no">
+            <p className="text-gray-400 font-black uppercase tracking-widest text-xs">
               Aguardando telemetria do simulador (IoT)...
             </p>
           </div>
