@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import type { IGestante } from '../types';
 import api from '../services/api';
 
+// IMPORTANDO A IMAGEM COM FUNDO PRETO QUE VOCÊ SALVOU
+import logoAlyne from '../assets/logo-alyne-watermark.jpg';
+
 const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
   <h2 className="text-xl font-black text-[#1a5276] mb-4 flex items-center gap-2">
     <span className="bg-[#1a5276] text-white p-1 rounded-md text-sm shadow-sm">🔍</span> {title}
@@ -47,7 +50,6 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
             return;
         }
         
-        // CORREÇÃO AQUI: setLoading em vez de loading
         setLoading(true); 
         setError('');
         
@@ -64,18 +66,17 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
     };
 
     return (
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4" translate="no">
             {/* Banner Principal REDE ALYNE */}
             <div className="bg-gradient-to-br from-[#1a5276] via-[#154360] to-[#0e2a3b] p-10 rounded-3xl shadow-2xl mb-10 text-white relative overflow-hidden border-b-4 border-blue-400">
     
-                {/* Ícone NOVO LOGOTIPO (Marca d'água) */}
-                <div className="absolute right-[-20px] top-[-20px] opacity-10 rotate-12 pointer-events-none z-0">
-                    <svg width="220" height="220" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 14v8" />
-                        <path d="M6 4l6 10l6-10" />
-                        <path d="M5 5c0 8 14 8 14 0" fill="rgba(255,255,255,0.2)" strokeWidth="1" />
-                        <circle cx="12" cy="8.5" r="2.5" fill="white" stroke="none" />
-                    </svg>
+                {/* MARCA D'ÁGUA COM MIX-BLEND-SCREEN (Some com o fundo preto) */}
+                <div className="absolute right-[-40px] top-[-40px] rotate-12 pointer-events-none z-0">
+                    <img 
+                        src={logoAlyne} 
+                        alt="Marca d'água Rede Alyne" 
+                        className="w-[300px] h-auto opacity-30 mix-blend-screen" 
+                    />
                 </div>
 
                 <div className="relative z-10">
