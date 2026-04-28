@@ -70,12 +70,12 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
             {/* Banner Principal REDE ALYNE */}
             <div className="bg-gradient-to-br from-[#1a5276] via-[#154360] to-[#0e2a3b] p-10 rounded-3xl shadow-2xl mb-10 text-white relative overflow-hidden border-b-4 border-blue-400">
     
-                {/* MARCA D'ÁGUA COM MIX-BLEND-SCREEN E TAMANHO AJUSTADO */}
-                <div className="absolute right-[-40px] top-[-40px] rotate-12 pointer-events-none z-0">
+                {/* MARCA DE ÁGUA MAIOR (450px) */}
+                <div className="absolute right-[-60px] top-[-60px] rotate-12 pointer-events-none z-0">
                     <img 
                         src={logoAlyne} 
-                        alt="Marca d'água Rede Alyne" 
-                        className="w-[300px] h-auto opacity-30 mix-blend-screen" 
+                        alt="Marca de água Rede Alyne" 
+                        className="w-[450px] h-auto opacity-30 mix-blend-screen" 
                     />
                 </div>
 
@@ -97,7 +97,7 @@ function SearchByCpf({ onGestanteFound, onClear, gestanteEncontrada }: SearchByC
                 </div>
             </div>
             
-            {/* Seção de Busca */}
+            {/* Secção de Busca */}
             <section className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                 <SectionTitle title="Acessar Cadastro" />
                 
