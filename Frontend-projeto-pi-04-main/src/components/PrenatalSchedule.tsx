@@ -34,8 +34,19 @@ const PrenatalSchedule: React.FC<PrenatalScheduleProps> = ({ scheduleData, setSc
   return (
     <div className="mt-4 select-none">
       <div className="bg-white rounded-3xl border-2 border-gray-200 shadow-2xl overflow-hidden">
+        {/* Scroll horizontal mobile com gesto touch */}
+        <div
+          className="overflow-x-auto [-webkit-overflow-scrolling:touch]"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
         {/* table-fixed garante que os botões fiquem em linha reta vertical com o título */}
-        <table className="w-full border-collapse table-fixed min-w-[900px]">
+        <table className="w-full border-collapse table-fixed min-w-[900px]"
+          style={{
+              scrollbarWidth: 'none',
+            }}>
           <thead>
             <tr className="bg-[#1a5276]">
               <th className="w-48 p-4 text-[10px] font-black text-blue-100 uppercase border-r border-blue-900/40 text-left">
