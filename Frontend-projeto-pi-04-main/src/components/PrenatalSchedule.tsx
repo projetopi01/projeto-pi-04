@@ -42,55 +42,56 @@ const PrenatalSchedule: React.FC<PrenatalScheduleProps> = ({ scheduleData, setSc
             msOverflowStyle: 'none',
           }}
         >
-        {/* table-fixed garante que os botões fiquem em linha reta vertical com o título */}
-        <table className="w-full border-collapse table-fixed min-w-[900px]"
-          style={{
+          {/* table-fixed garante que os botões fiquem em linha reta vertical com o título */}
+          <table className="w-full border-collapse table-fixed min-w-[900px]"
+            style={{
               scrollbarWidth: 'none',
             }}>
-          <thead>
-            <tr className="bg-[#1a5276]">
-              <th className="w-48 p-4 text-[10px] font-black text-blue-100 uppercase border-r border-blue-900/40 text-left">
-                Fase do Pré-Natal
-              </th>
-              {columns.map((col, i) => (
-                <th key={i} className="p-2 text-[9px] font-black text-white uppercase text-center border-l border-blue-900/40">
-                  <div className="flex items-center justify-center h-10 tracking-tighter">
-                    {col}
-                  </div>
+            <thead>
+              <tr className="bg-[#1a5276]">
+                <th className="w-48 p-4 text-[10px] font-black text-blue-100 uppercase border-r border-blue-900/40 text-left">
+                  Fase do Pré-Natal
                 </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {scheduleData.map((row, rowIndex) => (
-              <tr key={rowIndex} className="group hover:bg-blue-50/50 transition-colors border-b border-gray-100 last:border-0">
-                <td className="p-4 text-[11px] font-bold text-[#1a5276] bg-gray-50/30 group-hover:bg-blue-50 border-r border-gray-100 italic">
-                  {row.week}
-                </td>
-                {row.cells.map((cell, cellIndex) => {
-                  const config = statusConfig[cell.status] || statusConfig.pending;
-                  return (
-                    <td key={cellIndex} className="p-1 border-l border-gray-50 h-20">
-                      <div className="flex items-center justify-center w-full h-full">
-                        <button
-                          type="button"
-                          onClick={() => toggleStatus(rowIndex, cellIndex)}
-                          className={`
-                            w-12 h-12 rounded-2xl flex items-center justify-center text-2xl font-black transition-all
-                            hover:scale-110 active:scale-90 shadow-lg border-2
-                            ${config.color}
-                          `}
-                        >
-                          {config.icon}
-                        </button>
-                      </div>
-                    </td>
-                  );
-                })}
+                {columns.map((col, i) => (
+                  <th key={i} className="p-2 text-[9px] font-black text-white uppercase text-center border-l border-blue-900/40">
+                    <div className="flex items-center justify-center h-10 tracking-tighter">
+                      {col}
+                    </div>
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {scheduleData.map((row, rowIndex) => (
+                <tr key={rowIndex} className="group hover:bg-blue-50/50 transition-colors border-b border-gray-100 last:border-0">
+                  <td className="p-4 text-[11px] font-bold text-[#1a5276] bg-gray-50/30 group-hover:bg-blue-50 border-r border-gray-100 italic">
+                    {row.week}
+                  </td>
+                  {row.cells.map((cell, cellIndex) => {
+                    const config = statusConfig[cell.status] || statusConfig.pending;
+                    return (
+                      <td key={cellIndex} className="p-1 border-l border-gray-50 h-20">
+                        <div className="flex items-center justify-center w-full h-full">
+                          <button
+                            type="button"
+                            onClick={() => toggleStatus(rowIndex, cellIndex)}
+                            className={`
+                              w-12 h-12 rounded-2xl flex items-center justify-center text-2xl font-black transition-all
+                              hover:scale-110 active:scale-90 shadow-lg border-2
+                              ${config.color}
+                            `}
+                          >
+                            {config.icon}
+                          </button>
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
       
       {/* Legenda Discreta no Rodapé da Tabela */}
