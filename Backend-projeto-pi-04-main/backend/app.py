@@ -156,6 +156,7 @@ def create_gestante():
         return jsonify({'error': 'Dados não fornecidos'}), 400
     try:
         cpf_limpo = re.sub(r'\D', '', data.get('cpf', ''))
+        cep_limpo = re.sub(r'\D', '', data.get('cep', ''))
         if not cpf_limpo or len(cpf_limpo) != 11:
             return jsonify({'error': 'CPF inválido'}), 400
         if Usuario.query.filter_by(cpf=cpf_limpo).first():
@@ -167,7 +168,7 @@ def create_gestante():
             idade=idade, nome_mae=data.get('nome_mae'),
             data_prevista_parto=parse_date_flexible(data.get('data_prevista_parto')),
             ultima_menstruacao=parse_date_flexible(data.get('ultima_menstruacao')),
-            endereco=data.get('endereco'), cep=data.get('cep'),
+            endereco=data.get('endereco'), cep=cep_limpo,
             cidade=data.get('cidade'), estado=data.get('estado'),
             telefone=data.get('telefone'), cronograma=data.get('cronograma')
         )
@@ -202,10 +203,14 @@ def update_gestante(cpf):
     data = request.get_json()
 
     # 1. Atualiza os dados de texto
-    campos_texto = ['nome', 'nome_mae', 'endereco', 'cep', 'cidade', 'estado', 'telefone']
+    campos_texto = ['nome', 'nome_mae', 'endereco', 'cidade', 'estado', 'telefone']
     for campo in campos_texto:
         if campo in data and data[campo] is not None:
             setattr(usuario, campo, data[campo])
+
+    # CEP sem máscara, para caber em String(8)
+    if 'cep' in data and data['cep']:
+        usuario.cep = re.sub(r'\D', '', data['cep'])
 
     # 2. Atualiza as datas
     try:
