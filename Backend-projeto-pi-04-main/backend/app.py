@@ -20,7 +20,7 @@ app.config.update(
 instance_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance')
 os.makedirs(instance_path, exist_ok=True)
 
-# --- Banco de dados: PostgreSQL no Render, SQLite na máquina local ---
+# --- Banco de dados: PostgreSQL no Render, SQLite na maquina local ---
 database_url = os.getenv('DATABASE_URL')
 
 if database_url:
@@ -34,7 +34,7 @@ if database_url:
         'pool_recycle': 280,
     }
 else:
-    # Fallback local: mantém seus testes rodando sem instalar Postgres
+    # Fallback local: mantem os testes rodando sem instalar Postgres
     app.config['SQLALCHEMY_DATABASE_URI'] = (
         f'sqlite:///{os.path.join(instance_path, "usuarios.db")}'
     )
@@ -42,7 +42,17 @@ else:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'erlandsonsilvadonascimento')
 
-CORS(app, supports_credentials=True, origins=["[localhost](http://localhost:5173)", "[projeto-pi-04-1.onrender.com](https://projeto-pi-04-1.onrender.com)", "[projeto-pi-04-c4je.onrender.com](https://projeto-pi-04-c4je.onrender.com)", "[projeto-pi-04-1-7si2.onrender.com](https://projeto-pi-04-1-7si2.onrender.com)"])
+#Corrige CORS com lista de origens
+
+ORIGENS_PERMITIDAS = [
+    "http://" + "localhost:5173",
+    "https://" + "projeto-pi-04-1.onrender.com",
+    "https://" + "projeto-pi-04-c4je.onrender.com",
+    "https://" + "projeto-pi-04-1-7si2.onrender.com",
+]
+
+CORS(app, supports_credentials=True, origins=ORIGENS_PERMITIDAS)
+
 db = SQLAlchemy(app)
 
 class Usuario(db.Model):
@@ -197,14 +207,14 @@ def update_gestante(cpf):
         if campo in data and data[campo] is not None:
             setattr(usuario, campo, data[campo])
 
-    # 2. Atualiza as datas 
+    # 2. Atualiza as datas
     try:
         if 'ultima_menstruacao' in data and data['ultima_menstruacao']:
             usuario.ultima_menstruacao = parse_date_flexible(data['ultima_menstruacao'])
-        
+
         if 'data_prevista_parto' in data and data['data_prevista_parto']:
             usuario.data_prevista_parto = parse_date_flexible(data['data_prevista_parto'])
-            
+
         if 'data_nascimento' in data and data['data_nascimento']:
             usuario.data_nascimento = parse_date_flexible(data['data_nascimento'])
             # Recalcula a idade se a data de nascimento mudar
@@ -289,7 +299,7 @@ def delete_sinais_vitais(cpf):
 @login_required
 def prever_risco(cpf):
     model_path = os.path.join(instance_path, 'risk_model.joblib')
-    
+
     # Captura os sintomas enviados pelo Checklist do médico (0 ou 1)
     # Ex: /api/risco/12345678900?sangramento=1&cefaleia=0&edema=0
     sangramento = request.args.get('sangramento', 0, type=int)
@@ -302,7 +312,7 @@ def prever_risco(cpf):
 
     if not usuario or not sinais:
         return jsonify({'error': 'Dados insuficientes para fazer a predição.'}), 404
-    
+
     ultimo_sinal = sinais[0]
     idade = usuario.idade
 
@@ -337,7 +347,7 @@ def prever_risco(cpf):
 
     # Se o risco for baixo pelos pontos, ainda rodamos a IA para checar tendências
     metodo_usado = "Protocolo Clínico Ferraz 2025"
-    
+
     if risco_final == "Baixo" and os.path.exists(model_path):
         try:
             model = joblib.load(model_path)
@@ -350,10 +360,10 @@ def prever_risco(cpf):
                 idade, sinais_df['bat'].mean(), sinais_df['oxi'].mean(),
                 sinais_df['sis'].mean(), sinais_df['dia'].mean()
             ]], columns=['idade', 'batimentos_avg', 'oxigenacao_avg', 'pressao_sistolica_avg', 'pressao_diastolica_avg'])
-            
+
             dados_para_prever.columns = dados_para_prever.columns.astype(str)
             predicao = model.predict(dados_para_prever)
-            
+
             if predicao[0] != "Baixo":
                 risco_final = predicao[0]
                 metodo_usado = "Machine Learning (Tendência Histórica)"
@@ -374,4 +384,3 @@ if __name__ == '__main__':
    port = int(os.environ.get("PORT", 5000))
    print("\n--- INSPECIONANDO ROTAS REGISTRADAS NO FLASK ---")
    app.run(host="0.0.0.0", port=port)
-
