@@ -350,7 +350,7 @@ def prever_risco(cpf):
     else:
         risco_final = "Baixo"
 
-    # Se o risco for baixo pelos pontos, ainda rodamos a IA para checar tendências
+        # Se o risco for baixo pelos pontos, ainda rodamos a IA para checar tendências
     metodo_usado = "Protocolo Clínico Ferraz 2025"
 
     if risco_final == "Baixo" and os.path.exists(model_path):
@@ -384,6 +384,72 @@ def prever_risco(cpf):
             'pressao': f"{ultimo_sinal.pressao_sistolica}/{ultimo_sinal.pressao_diastolica}"
         }
     }), 200
+
+
+
+# --- Integracao IoT: dispositivo envia telemetria com token, sem login de usuario ---
+
+IOT_TOKEN = os.getenv('IOT_TOKEN')
+
+
+def token_dispositivo_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not IOT_TOKEN:
+            return jsonify({'error': 'IOT_TOKEN nao configurado no servidor'}), 500
+        if request.headers.get('X-Device-Token') != IOT_TOKEN:
+            return jsonify({'error': 'Dispositivo nao autorizado'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+@app.route('/api/iot/telemetria', methods=['POST'])
+@token_dispositivo_required
+def receber_telemetria():
+    """
+    Recebe sinais vitais de um dispositivo IoT (Arduino/simulador).
+    Autentica por token no header X-Device-Token, sem sessao de usuario.
+    """
+    data = request.get_json()
+
+    campos_obrigatorios = ['cpf', 'batimentos', 'oxigenacao',
+                           'pressao_sistolica', 'pressao_diastolica']
+
+    if not data or any(c not in data for c in campos_obrigatorios):
+        return jsonify({'error': 'Dados incompletos'}), 400
+
+    cpf_limpo = re.sub(r'\D', '', str(data.get('cpf', '')))
+    if not cpf_limpo or len(cpf_limpo) != 11:
+        return jsonify({'error': 'CPF invalido'}), 400
+
+    usuario = Usuario.query.filter_by(cpf=cpf_limpo).first()
+    if not usuario:
+        return jsonify({'error': 'Gestante nao encontrada'}), 404
+
+    try:
+        novo_sinal = SinaisVitais(
+            usuario_cpf=cpf_limpo,
+            batimentos_cardiacos=float(data['batimentos']),
+            oxigenacao_sangue=float(data['oxigenacao']),
+            pressao_sistolica=int(data['pressao_sistolica']),
+            pressao_diastolica=int(data['pressao_diastolica'])
+        )
+        db.session.add(novo_sinal)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Telemetria recebida com sucesso',
+            'cpf': cpf_limpo,
+            'id_sinal': novo_sinal.id
+        }), 201
+
+    except (ValueError, TypeError):
+        db.session.rollback()
+        return jsonify({'error': 'Valores invalidos nos sinais vitais'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Erro ao salvar telemetria', 'details': str(e)}), 500
+
 
 if __name__ == '__main__':
    port = int(os.environ.get("PORT", 5000))
