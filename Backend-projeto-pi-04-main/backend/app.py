@@ -11,7 +11,7 @@ import pandas as pd
 
 app = Flask(__name__)
 app.config.update(
-    SESSION_COOKIE_SAMESITE='None', 
+    SESSION_COOKIE_SAMESITE='None',
     #para permitir que o Front converse com o back porque eles estão em URLs diferentes
     SESSION_COOKIE_SECURE=True,
     SESSION_COOKIE_HTTPONLY=True
@@ -20,11 +20,29 @@ app.config.update(
 instance_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance')
 os.makedirs(instance_path, exist_ok=True)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(instance_path, "usuarios.db")}'
+# --- Banco de dados: PostgreSQL no Render, SQLite na máquina local ---
+database_url = os.getenv('DATABASE_URL')
+
+if database_url:
+    # O Render fornece a URL como postgres:// ; o SQLAlchemy 2.x exige postgresql://
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,
+        'pool_recycle': 280,
+    }
+else:
+    # Fallback local: mantém seus testes rodando sem instalar Postgres
+    app.config['SQLALCHEMY_DATABASE_URI'] = (
+        f'sqlite:///{os.path.join(instance_path, "usuarios.db")}'
+    )
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'erlandsonsilvadonascimento')
 
-CORS(app, supports_credentials=True, origins=["http://localhost:5173", "https://projeto-pi-04-1.onrender.com", "https://projeto-pi-04-c4je.onrender.com", "https://projeto-pi-04-1-7si2.onrender.com"])
+CORS(app, supports_credentials=True, origins=["[localhost](http://localhost:5173)", "[projeto-pi-04-1.onrender.com](https://projeto-pi-04-1.onrender.com)", "[projeto-pi-04-c4je.onrender.com](https://projeto-pi-04-c4je.onrender.com)", "[projeto-pi-04-1-7si2.onrender.com](https://projeto-pi-04-1-7si2.onrender.com)"])
 db = SQLAlchemy(app)
 
 class Usuario(db.Model):
