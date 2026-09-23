@@ -17,3 +17,4 @@ pandas
 numpy
 scikit-learn
 setuptools==75.8.0
+psycopg2-binary==2.9.10
