@@ -68,6 +68,7 @@ class Usuario(db.Model):
     cep = db.Column(db.String(8), nullable=False)
     cidade = db.Column(db.String(100), nullable=False)
     estado = db.Column(db.String(100), nullable=False)
+    unidade = db.Column(db.String(120), nullable=True)
     telefone = db.Column(db.String(20), nullable=False)
     cronograma = db.Column(db.JSON, nullable=True)
 
@@ -85,6 +86,7 @@ class Usuario(db.Model):
             'cep': self.cep,
             'cidade': self.cidade,
             'estado': self.estado,
+            'unidade': self.unidade,
             'telefone': self.telefone,
             'cronograma': self.cronograma,
         }
@@ -105,7 +107,35 @@ def create_tables():
     with app.app_context():
         db.create_all()
 
+
+def garantir_coluna_unidade():
+    """Cria a coluna 'unidade' se ela ainda nao existir (migracao automatica)."""
+    from sqlalchemy import text, inspect
+    with app.app_context():
+        try:
+            inspetor = inspect(db.engine)
+            if 'usuario' not in inspetor.get_table_names():
+                print('[MIGRACAO] Tabela usuario ainda nao existe. Nada a fazer.')
+                return
+
+            colunas = [c['name'] for c in inspetor.get_columns('usuario')]
+
+            if 'unidade' not in colunas:
+                db.session.execute(
+                    text('ALTER TABLE usuario ADD COLUMN unidade VARCHAR(120)')
+                )
+                db.session.commit()
+                print('[MIGRACAO] Coluna unidade criada com sucesso.')
+            else:
+                print('[MIGRACAO] Coluna unidade ja existe. Nada a fazer.')
+
+        except Exception as e:
+            db.session.rollback()
+            print(f'[MIGRACAO] Nao foi possivel garantir a coluna unidade: {e}')
+
+
 create_tables()
+garantir_coluna_unidade()
 
 
 def login_required(f):
@@ -170,6 +200,7 @@ def create_gestante():
             ultima_menstruacao=parse_date_flexible(data.get('ultima_menstruacao')),
             endereco=data.get('endereco'), cep=cep_limpo,
             cidade=data.get('cidade'), estado=data.get('estado'),
+            unidade=data.get('unidade'),
             telefone=data.get('telefone'), cronograma=data.get('cronograma')
         )
         db.session.add(novo_usuario)
@@ -203,7 +234,7 @@ def update_gestante(cpf):
     data = request.get_json()
 
     # 1. Atualiza os dados de texto
-    campos_texto = ['nome', 'nome_mae', 'endereco', 'cidade', 'estado', 'telefone']
+    campos_texto = ['nome', 'nome_mae', 'endereco', 'cidade', 'estado', 'unidade', 'telefone']
     for campo in campos_texto:
         if campo in data and data[campo] is not None:
             setattr(usuario, campo, data[campo])
@@ -350,7 +381,7 @@ def prever_risco(cpf):
     else:
         risco_final = "Baixo"
 
-        # Se o risco for baixo pelos pontos, ainda rodamos a IA para checar tendências
+    # Se o risco for baixo pelos pontos, ainda rodamos a IA para checar tendências
     metodo_usado = "Protocolo Clínico Ferraz 2025"
 
     if risco_final == "Baixo" and os.path.exists(model_path):
@@ -455,3 +486,4 @@ if __name__ == '__main__':
    port = int(os.environ.get("PORT", 5000))
    print("\n--- INSPECIONANDO ROTAS REGISTRADAS NO FLASK ---")
    app.run(host="0.0.0.0", port=port)
+
