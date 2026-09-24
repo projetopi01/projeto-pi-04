@@ -482,6 +482,102 @@ def receber_telemetria():
         return jsonify({'error': 'Erro ao salvar telemetria', 'details': str(e)}), 500
 
 
+# --- Painel do gestor: indicadores agregados ---
+
+@app.route('/api/indicadores', methods=['GET'])
+@login_required
+def indicadores():
+    """
+    Indicadores agregados para o painel do gestor.
+    """
+    from datetime import timedelta
+
+    def pontuar(sinal, idade):
+        pontos = 0
+        if sinal.pressao_sistolica >= 140 or sinal.pressao_diastolica >= 90:
+            pontos += 10
+        if sinal.batimentos_cardiacos > 110:
+            pontos += 5
+        if sinal.oxigenacao_sangue < 94:
+            pontos += 10
+        if idade is not None and (idade >= 40 or idade <= 15):
+            pontos += 5
+        return pontos
+
+    def classificar(pontos):
+        if pontos >= 10:
+            return "Alto"
+        if pontos >= 5:
+            return "Medio"
+        return "Baixo"
+
+    try:
+        usuarios = Usuario.query.all()
+        total = len(usuarios)
+
+        ultimo_por_cpf = {}
+        for sinal in SinaisVitais.query.order_by(SinaisVitais.timestamp.asc()).all():
+            ultimo_por_cpf[sinal.usuario_cpf] = sinal
+
+        por_unidade = {}
+        por_risco = {"Alto": 0, "Medio": 0, "Baixo": 0}
+        sem_afericao = 0
+        sem_sinal = 0
+        soma_idades = 0
+        com_idade = 0
+        alertas = []
+
+        for u in usuarios:
+            nome_unidade = u.unidade or "Sem unidade informada"
+            por_unidade[nome_unidade] = por_unidade.get(nome_unidade, 0) + 1
+
+            if u.idade:
+                soma_idades += u.idade
+                com_idade += 1
+
+            sinal = ultimo_por_cpf.get(u.cpf)
+            if sinal is None:
+                sem_sinal += 1
+                continue
+
+            pontos = pontuar(sinal, u.idade)
+            risco = classificar(pontos)
+            por_risco[risco] += 1
+
+            if risco == "Alto":
+                alertas.append({
+                    "cpf": u.cpf,
+                    "nome": u.nome,
+                    "unidade": nome_unidade,
+                    "pontuacao": pontos,
+                    "pressao": f"{sinal.pressao_sistolica}/{sinal.pressao_diastolica}",
+                    "oxigenacao": sinal.oxigenacao_sangue,
+                    "batimentos": sinal.batimentos_cardiacos,
+                    "ultima_leitura": sinal.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                })
+
+        limite = datetime.utcnow() - timedelta(days=30)
+        for u in usuarios:
+            sinal = ultimo_por_cpf.get(u.cpf)
+            if sinal is None or sinal.timestamp < limite:
+                sem_afericao += 1
+
+        media_idade = round(soma_idades / com_idade, 1) if com_idade else None
+
+        return jsonify({
+            "total_gestantes": total,
+            "por_unidade": por_unidade,
+            "por_risco": por_risco,
+            "gestantes_sem_afericao_30_dias": sem_afericao,
+            "gestantes_sem_sinal_registrado": sem_sinal,
+            "media_idade": media_idade,
+            "alertas_alto_risco": alertas,
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': 'Erro ao calcular indicadores', 'details': str(e)}), 500
+
+
 if __name__ == '__main__':
    port = int(os.environ.get("PORT", 5000))
    print("\n--- INSPECIONANDO ROTAS REGISTRADAS NO FLASK ---")
