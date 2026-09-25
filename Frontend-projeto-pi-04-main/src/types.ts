@@ -23,7 +23,7 @@ export interface IGestante {
   cep: string;
   cidade: string;
   estado: string;
-  unidade: string;
+  unidade?: string;
   telefone: string;
   cronograma: RowData[] | null;
 }
