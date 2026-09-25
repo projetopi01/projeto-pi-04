@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
 import type { FormData } from '../types';
+import { UNIDADES } from '../types';
 
 const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
   <h2 className="text-2xl font-black text-center text-[#1a5276] mb-6 uppercase tracking-tighter">{title}</h2>
@@ -12,16 +13,17 @@ interface RegistrationFormProps {
 }
 
 export function RegistrationForm({ formData, setFormData }: RegistrationFormProps) {
-    const labels: Record<string, string> = { 
-        cpf: 'CPF', nome: 'Nome Completo', data_nascimento: 'Data de Nascimento', 
-        idade: 'Idade', nome_mae: 'Nome da Mãe', data_prevista_parto: 'Data Prevista do Parto (DPP)', 
-        ultima_menstruacao: 'DUM (Última Menstruação)', endereco: 'Endereço Completo', 
-        cep: 'CEP', cidade: 'Cidade', estado: 'Estado', telefone: 'Telefone / WhatsApp' 
+    const labels: Record<string, string> = {
+        cpf: 'CPF', nome: 'Nome Completo', data_nascimento: 'Data de Nascimento',
+        idade: 'Idade', nome_mae: 'Nome da Mãe', data_prevista_parto: 'Data Prevista do Parto (DPP)',
+        ultima_menstruacao: 'DUM (Última Menstruação)', endereco: 'Endereço Completo',
+        cep: 'CEP', cidade: 'Cidade', estado: 'Estado', unidade: 'Unidade de Saúde',
+        telefone: 'Telefone / WhatsApp'
     };
-    
+
     const dateFields = ['data_nascimento', 'data_prevista_parto', 'ultima_menstruacao'];
-    const fieldOrder: (keyof FormData)[] = [ 'cpf', 'nome', 'data_nascimento', 'idade', 'nome_mae', 'data_prevista_parto', 'ultima_menstruacao', 'cep', 'endereco', 'cidade', 'estado', 'telefone' ];
-    
+    const fieldOrder: (keyof FormData)[] = [ 'cpf', 'nome', 'data_nascimento', 'idade', 'nome_mae', 'data_prevista_parto', 'ultima_menstruacao', 'cep', 'endereco', 'cidade', 'estado', 'unidade', 'telefone' ];
+
     // FUNÇÕES DE MÁSCARA
     const aplicarMascaraCPF = (v: string) => {
         v = v.replace(/\D/g, "");
@@ -46,7 +48,7 @@ export function RegistrationForm({ formData, setFormData }: RegistrationFormProp
         return v.substring(0, 9);
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         let valorProcessado = value;
 
@@ -76,11 +78,11 @@ export function RegistrationForm({ formData, setFormData }: RegistrationFormProp
             try {
                 const { data } = await axios.get(`https://viacep.com.br/ws/${cepLimpo}/json/`);
                 if (!data.erro) {
-                    setFormData(prev => ({ 
-                        ...prev, 
-                        endereco: data.logradouro, 
-                        cidade: data.localidade, 
-                        estado: data.uf 
+                    setFormData(prev => ({
+                        ...prev,
+                        endereco: data.logradouro,
+                        cidade: data.localidade,
+                        estado: data.uf
                     }));
                 }
             } catch (error) { console.error("Erro ao buscar CEP", error); }
@@ -90,7 +92,7 @@ export function RegistrationForm({ formData, setFormData }: RegistrationFormProp
     return (
         <section className="bg-white p-2 md:p-4 rounded-xl mb-4" translate="no">
             <SectionTitle title="Ficha Cadastral" />
-            
+
             <div className="space-y-10">
                 {/* GRUPO 1: IDENTIFICAÇÃO */}
                 <div>
@@ -150,16 +152,31 @@ export function RegistrationForm({ formData, setFormData }: RegistrationFormProp
                         {fieldOrder.slice(7).map((key) => (
                             <div key={key} className={`flex flex-col ${key === 'endereco' ? 'lg:col-span-2' : ''}`}>
                                 <label htmlFor={key} className="notranslate mb-1.5 text-xs font-bold text-gray-500 uppercase tracking-tight">{labels[key]}</label>
-                                <input
-                                    type="text"
-                                    id={key}
-                                    name={key}
-                                    value={formData[key]}
-                                    onChange={handleChange}
-                                    onBlur={key === 'cep' ? handleCepSearch : undefined}
-                                    placeholder={key === 'telefone' ? '(00) 00000-0000' : key === 'cep' ? '00000-000' : ''}
-                                    className="p-3 border-2 border-gray-100 rounded-xl focus:border-[#1a5276] focus:ring-4 focus:ring-blue-50 bg-white font-bold text-gray-700"
-                                />
+                                {key === 'unidade' ? (
+                                    <select
+                                        id={key}
+                                        name={key}
+                                        value={formData.unidade}
+                                        onChange={handleChange}
+                                        className="p-3 border-2 border-gray-100 rounded-xl outline-none transition-all focus:border-[#1a5276] focus:ring-4 focus:ring-blue-50 bg-white font-bold text-gray-700 cursor-pointer"
+                                    >
+                                        <option value="">Selecione a unidade</option>
+                                        {UNIDADES.map((u) => (
+                                            <option key={u} value={u}>{u}</option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <input
+                                        type="text"
+                                        id={key}
+                                        name={key}
+                                        value={formData[key]}
+                                        onChange={handleChange}
+                                        onBlur={key === 'cep' ? handleCepSearch : undefined}
+                                        placeholder={key === 'telefone' ? '(00) 00000-0000' : key === 'cep' ? '00000-000' : ''}
+                                        className="p-3 border-2 border-gray-100 rounded-xl focus:border-[#1a5276] focus:ring-4 focus:ring-blue-50 bg-white font-bold text-gray-700"
+                                    />
+                                )}
                             </div>
                         ))}
                     </div>
@@ -170,3 +187,4 @@ export function RegistrationForm({ formData, setFormData }: RegistrationFormProp
 }
 
 export default RegistrationForm;
+
