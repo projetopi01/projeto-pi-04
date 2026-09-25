@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { UNIDADES } from '../types';
 
 type Alerta = {
   cpf: string;
@@ -23,6 +24,7 @@ type Indicadores = {
 };
 
 const COR = '#1a5276';
+const TODAS = 'Todas as unidades';
 
 function CardResumo({
   titulo,
@@ -54,6 +56,7 @@ export default function DashboardGestorPage() {
   const [dados, setDados] = useState<Indicadores | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [filtroUnidade, setFiltroUnidade] = useState<string>(TODAS);
 
   useEffect(() => {
     let ativo = true;
@@ -112,39 +115,99 @@ export default function DashboardGestorPage() {
     );
   }
 
-  const unidades = Object.entries(dados.por_unidade).sort((a, b) => b[1] - a[1]);
-  const maiorUnidade = unidades.length ? unidades[0][1] : 1;
+  // ---- FILTRO POR UNIDADE ----
+  const filtrando = filtroUnidade !== TODAS;
 
-  const risco = dados.por_risco || {};
-  const alto = risco['Alto'] || 0;
-  const medio = risco['Medio'] || 0;
-  const baixo = risco['Baixo'] || 0;
-  const totalRisco = alto + medio + baixo || 1;
+  const unidadesDisponiveis: string[] = [
+    ...UNIDADES.filter((u) => u in dados.por_unidade),
+    ...Object.keys(dados.por_unidade).filter(
+      (u) => !UNIDADES.includes(u) && u !== TODAS
+    ),
+  ];
+
+  const porUnidade = filtrando
+    ? { [filtroUnidade]: dados.por_unidade[filtroUnidade] || 0 }
+    : dados.por_unidade;
+
+  const alertas = filtrando
+    ? dados.alertas_alto_risco.filter((a) => a.unidade === filtroUnidade)
+    : dados.alertas_alto_risco;
+
+  // Recalcula os totais sobre o recorte atual
+  const totalGestantes = filtrando
+    ? dados.por_unidade[filtroUnidade] || 0
+    : dados.total_gestantes;
+
+  const alto = alertas.length;
+  const totalComSinal = filtrando
+    ? Math.max(0, totalGestantes - dados.gestantes_sem_sinal_registrado)
+    : Math.max(0, dados.total_gestantes - dados.gestantes_sem_sinal_registrado);
+  const baixo = Math.max(0, totalComSinal - alto);
+
+  const semAfericao = filtrando
+    ? Math.min(dados.gestantes_sem_afericao_30_dias, totalGestantes)
+    : dados.gestantes_sem_afericao_30_dias;
+
+  const mediaIdade = filtrando ? '--' : (dados.media_idade ?? '--');
+
+  const unidades = Object.entries(porUnidade).sort((a, b) => b[1] - a[1]);
+  const maiorUnidade = unidades.length ? unidades[0][1] : 1;
+  const totalRisco = alto + baixo || 1;
 
   return (
     <div className="flex flex-col gap-8">
-      {/* CABECALHO DA PAGINA */}
-      <div>
-        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">
-          Painel de Gestão
+      {/* CABECALHO DA PAGINA + SELETOR DE UNIDADE */}
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">
+            Painel de Gestão
+          </div>
+          <h1
+            className="text-2xl font-black uppercase tracking-tighter mt-1"
+            style={{ color: COR }}
+          >
+            Indicadores do Pré-Natal
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Visão agregada das gestantes acompanhadas na rede.
+          </p>
         </div>
-        <h1
-          className="text-2xl font-black uppercase tracking-tighter mt-1"
-          style={{ color: COR }}
-        >
-          Indicadores do Pré-Natal
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Visão agregada das gestantes acompanhadas na rede.
-        </p>
+
+        <div className="flex flex-col">
+          <label
+            htmlFor="filtroUnidade"
+            className="mb-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest"
+          >
+            Filtrar por unidade
+          </label>
+          <select
+            id="filtroUnidade"
+            value={filtroUnidade}
+            onChange={(e) => setFiltroUnidade(e.target.value)}
+            className="p-3 pr-10 border-2 border-gray-100 rounded-xl outline-none transition-all focus:border-[#1a5276] focus:ring-4 focus:ring-blue-50 font-bold text-gray-700 bg-white min-w-[240px] cursor-pointer"
+          >
+            <option value={TODAS}>{TODAS}</option>
+            {unidadesDisponiveis.map((u) => (
+              <option key={u} value={u}>
+                {u}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+
+      {filtrando && (
+        <div className="text-xs font-bold text-[#1a5276] bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+          Exibindo apenas: {filtroUnidade} — {totalGestantes} gestante(s) e {alto} alerta(s).
+        </div>
+      )}
 
       {/* CARDS DE RESUMO */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <CardResumo
           titulo="Gestantes"
-          valor={dados.total_gestantes}
-          legenda="acompanhadas na rede"
+          valor={totalGestantes}
+          legenda={filtrando ? filtroUnidade : 'acompanhadas na rede'}
           cor={COR}
         />
         <CardResumo
@@ -155,14 +218,14 @@ export default function DashboardGestorPage() {
         />
         <CardResumo
           titulo="Sem aferição"
-          valor={dados.gestantes_sem_afericao_30_dias}
+          valor={semAfericao}
           legenda="nos últimos 30 dias"
           cor="#f59e0b"
         />
         <CardResumo
           titulo="Idade média"
-          valor={dados.media_idade ?? '--'}
-          legenda="anos"
+          valor={mediaIdade}
+          legenda={filtrando ? 'geral da rede' : 'anos'}
           cor="#0f766e"
         />
       </div>
@@ -171,14 +234,14 @@ export default function DashboardGestorPage() {
         {/* POR UNIDADE */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-5">
-            Gestantes por unidade
+            {filtrando ? 'Gestantes nesta unidade' : 'Gestantes por unidade'}
           </div>
           <div className="flex flex-col gap-4">
             {unidades.map(([nome, qtd]) => (
               <div key={nome}>
-                <div className="flex justify-between items-baseline mb-1">
+                <div className="flex justify-between items-baseline mb-1 gap-3">
                   <span className="text-sm font-bold text-gray-600">{nome}</span>
-                  <span className="text-sm font-black" style={{ color: COR }}>
+                  <span className="text-sm font-black shrink-0" style={{ color: COR }}>
                     {qtd}
                   </span>
                 </div>
@@ -199,17 +262,13 @@ export default function DashboardGestorPage() {
         {/* POR RISCO */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-5">
-            Distribuição de risco
+            {filtrando ? 'Risco nesta unidade' : 'Distribuição de risco'}
           </div>
 
           <div className="flex h-3 rounded-full overflow-hidden mb-5">
             <div
               className="bg-rose-500"
               style={{ width: `${(alto / totalRisco) * 100}%` }}
-            />
-            <div
-              className="bg-amber-400"
-              style={{ width: `${(medio / totalRisco) * 100}%` }}
             />
             <div
               className="bg-emerald-500"
@@ -220,8 +279,7 @@ export default function DashboardGestorPage() {
           <div className="flex flex-col gap-3">
             {[
               { nome: 'Alto', qtd: alto, cor: '#e11d48' },
-              { nome: 'Médio', qtd: medio, cor: '#f59e0b' },
-              { nome: 'Baixo', qtd: baixo, cor: '#10b981' },
+              { nome: 'Demais', qtd: baixo, cor: '#10b981' },
             ].map((r) => (
               <div key={r.nome} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -229,9 +287,7 @@ export default function DashboardGestorPage() {
                     className="w-2.5 h-2.5 rounded-full"
                     style={{ backgroundColor: r.cor }}
                   />
-                  <span className="text-sm font-bold text-gray-600">
-                    {r.nome}
-                  </span>
+                  <span className="text-sm font-bold text-gray-600">{r.nome}</span>
                 </div>
                 <span className="text-sm font-black" style={{ color: r.cor }}>
                   {r.qtd}
@@ -240,7 +296,7 @@ export default function DashboardGestorPage() {
             ))}
           </div>
 
-          {dados.gestantes_sem_sinal_registrado > 0 && (
+          {dados.gestantes_sem_sinal_registrado > 0 && !filtrando && (
             <div className="mt-5 pt-4 border-t border-gray-100 text-xs text-gray-400 font-medium">
               {dados.gestantes_sem_sinal_registrado} gestante(s) sem nenhum sinal
               registrado.
@@ -251,19 +307,20 @@ export default function DashboardGestorPage() {
 
       {/* ALERTAS */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between gap-3">
           <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
             Alertas de alto risco
+            {filtrando ? ` — ${filtroUnidade}` : ''}
           </div>
           <span
-            className="text-xs font-black px-3 py-1 rounded-full"
+            className="text-xs font-black px-3 py-1 rounded-full shrink-0"
             style={{ backgroundColor: '#fee2e2', color: '#e11d48' }}
           >
-            {dados.alertas_alto_risco.length}
+            {alertas.length}
           </span>
         </div>
 
-        {dados.alertas_alto_risco.length === 0 ? (
+        {alertas.length === 0 ? (
           <div className="px-6 py-10 text-center text-sm text-gray-400 font-medium">
             Nenhuma gestante em alto risco no momento.
           </div>
@@ -281,7 +338,7 @@ export default function DashboardGestorPage() {
                 </tr>
               </thead>
               <tbody>
-                {dados.alertas_alto_risco.map((a) => (
+                {alertas.map((a) => (
                   <tr
                     key={a.cpf}
                     className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
