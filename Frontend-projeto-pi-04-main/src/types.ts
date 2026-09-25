@@ -23,8 +23,19 @@ export interface IGestante {
   cep: string;
   cidade: string;
   estado: string;
+  unidade: string;
   telefone: string;
   cronograma: RowData[] | null;
 }
 
 export type FormData = Omit<IGestante, 'id' | 'cronograma' | 'idade'> & { idade: string };
+
+// Unidades de saude atendidas pela rede.
+// Lista fixa por enquanto; a evolucao prevista e virar cadastro no banco.
+export const UNIDADES: string[] = [
+  'UBS Jardim Suzanopolis',
+  'UBS Agua Bela',
+  'UBS Vila Itaqua',
+  'UBS Centro Poa',
+  'Hospital Municipal Alto Tiete',
+];
