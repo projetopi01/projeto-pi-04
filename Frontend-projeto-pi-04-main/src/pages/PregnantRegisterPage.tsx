@@ -10,7 +10,7 @@ import type { IGestante, FormData, RowData } from '../types';
 
 export const initialFormState: FormData = {
     cpf: '', nome: '', data_nascimento: '', idade: '', nome_mae: '', data_prevista_parto: '', ultima_menstruacao: '',
-    endereco: '', cep: '', cidade: '', estado: '', telefone: ''
+    endereco: '', cep: '', cidade: '', estado: '', unidade: '', telefone: ''
 };
 
 const initialScheduleData: RowData[] = [
@@ -42,7 +42,7 @@ function PregnantRegisterPage() {
 
     const onGestanteFound = (gestante: IGestante) => {
         const { id, cronograma, idade, ...restOfData } = gestante;
-        setFormData({ ...restOfData, idade: idade.toString() });
+        setFormData({ ...restOfData, unidade: restOfData.unidade || '', idade: idade.toString() });
         
         if (cronograma && cronograma.length === initialScheduleData.length) {
             setScheduleData(cronograma);
@@ -235,3 +235,4 @@ function PregnantRegisterPage() {
 }
 
 export default PregnantRegisterPage;
+
