@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import PregnantRegisterPage from './pages/PregnantRegisterPage';
 import SuccessPage from './pages/SuccessPage';
 import ErrorPage from './pages/ErrorPage';
+import DashboardGestorPage from './pages/DashboardGestorPage';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
 function App() {
@@ -11,30 +12,40 @@ function App() {
     <BrowserRouter>
       <Layout>
         <Routes>
-        
-          <Route path="/login" element={<LoginPage />} />   
 
-           <Route 
-            path="/" 
+          <Route path="/login" element={<LoginPage />} />
+
+          <Route
+            path="/"
             element={
               <ProtectedRoute>
                 <PregnantRegisterPage />
               </ProtectedRoute>
-            } 
+            }
           />
+
+          <Route
+            path="/painel"
+            element={
+              <ProtectedRoute>
+                <DashboardGestorPage />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="/sucesso" element={<SuccessPage />} />
-          
-          <Route 
-            path="*" 
+
+          <Route
+            path="*"
             element={
               <ErrorPage
-                message="A página que você está procurando não foi encontrada."
+                message="A pÃ¡gina que vocÃª estÃ¡ procurando nÃ£o foi encontrada."
                 backLink="/"
-                backLinkText="Voltar para a Página de Registro"
+                backLinkText="Voltar para a PÃ¡gina de Registro"
               />
-            } 
+            }
           />
-          
+
         </Routes>
       </Layout>
     </BrowserRouter>
@@ -42,3 +53,4 @@ function App() {
 }
 
 export default App;
+
