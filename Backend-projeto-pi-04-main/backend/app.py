@@ -578,6 +578,55 @@ def indicadores():
         return jsonify({'error': 'Erro ao calcular indicadores', 'details': str(e)}), 500
 
 
+# --- Diagnostico do banco de dados (remover depois do teste) ---
+
+@app.route('/api/diagnostico', methods=['GET'])
+def diagnostico():
+    """Mostra qual banco de dados o sistema esta usando."""
+    from sqlalchemy import text
+
+    info = {
+        "database_url_definida": bool(os.getenv('DATABASE_URL')),
+        "tipo_de_banco": None,
+        "tabelas_existentes": [],
+        "total_gestantes": None,
+        "coluna_unidade_existe": None,
+        "host": None,
+    }
+
+    try:
+        uri = str(db.engine.url)
+
+        if '@' in uri:
+            sem_credencial = uri.split('@')[-1]
+        else:
+            sem_credencial = uri
+
+        info["host"] = sem_credencial
+
+        if uri.startswith('postgresql'):
+            info["tipo_de_banco"] = "PostgreSQL"
+        elif uri.startswith('sqlite'):
+            info["tipo_de_banco"] = "SQLite (arquivo local)"
+        else:
+            info["tipo_de_banco"] = "desconhecido"
+
+        inspetor = __import__('sqlalchemy').inspect(db.engine)
+        info["tabelas_existentes"] = inspetor.get_table_names()
+
+        if 'usuario' in info["tabelas_existentes"]:
+            colunas = [c['name'] for c in inspetor.get_columns('usuario')]
+            info["coluna_unidade_existe"] = 'unidade' in colunas
+            info["total_gestantes"] = db.session.execute(
+                text('SELECT COUNT(*) FROM usuario')
+            ).scalar()
+
+    except Exception as e:
+        info["erro"] = str(e)
+
+    return jsonify(info), 200
+
+
 if __name__ == '__main__':
    port = int(os.environ.get("PORT", 5000))
    print("\n--- INSPECIONANDO ROTAS REGISTRADAS NO FLASK ---")
