@@ -521,6 +521,7 @@ def indicadores():
 
         por_unidade = {}
         por_risco = {"Alto": 0, "Medio": 0, "Baixo": 0}
+        risco_por_unidade = {}
         sem_afericao = 0
         sem_sinal = 0
         soma_idades = 0
@@ -543,6 +544,10 @@ def indicadores():
             pontos = pontuar(sinal, u.idade)
             risco = classificar(pontos)
             por_risco[risco] += 1
+
+            if nome_unidade not in risco_por_unidade:
+                risco_por_unidade[nome_unidade] = {"Alto": 0, "Medio": 0, "Baixo": 0}
+            risco_por_unidade[nome_unidade][risco] += 1
 
             if risco == "Alto":
                 alertas.append({
@@ -568,6 +573,7 @@ def indicadores():
             "total_gestantes": total,
             "por_unidade": por_unidade,
             "por_risco": por_risco,
+            "risco_por_unidade": risco_por_unidade,
             "gestantes_sem_afericao_30_dias": sem_afericao,
             "gestantes_sem_sinal_registrado": sem_sinal,
             "media_idade": media_idade,
